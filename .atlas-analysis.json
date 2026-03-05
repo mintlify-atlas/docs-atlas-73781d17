@@ -1,0 +1,131 @@
+{
+  "projectType": "sdk-library",
+  "projectName": "Paper Shaders",
+  "projectDescription": "Zero-dependency canvas shaders that can be installed from npm or designed in Paper",
+  "theme": "willow",
+  "primaryColor": "#84acec",
+  "lightColor": "#f3f4f4",
+  "darkColor": null,
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "installation",
+              "quickstart"
+            ]
+          },
+          {
+            "group": "Shaders",
+            "pages": [
+              "shaders/overview",
+              "shaders/mesh-gradient",
+              "shaders/static-mesh-gradient",
+              "shaders/static-radial-gradient",
+              "shaders/grain-gradient",
+              "shaders/smoke-ring",
+              "shaders/simplex-noise",
+              "shaders/neuro-noise",
+              "shaders/perlin-noise",
+              "shaders/metaballs",
+              "shaders/voronoi",
+              "shaders/warp",
+              "shaders/swirl",
+              "shaders/spiral",
+              "shaders/god-rays",
+              "shaders/dot-orbit",
+              "shaders/dot-grid",
+              "shaders/waves",
+              "shaders/dithering",
+              "shaders/pulsing-border",
+              "shaders/color-panels",
+              "shaders/paper-texture",
+              "shaders/water",
+              "shaders/fluted-glass",
+              "shaders/image-dithering",
+              "shaders/halftone-dots",
+              "shaders/halftone-cmyk",
+              "shaders/heatmap",
+              "shaders/liquid-metal"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "guides/react-usage",
+              "guides/vanilla-usage",
+              "guides/customization",
+              "guides/performance",
+              "guides/sizing-and-fit"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Core",
+            "pages": [
+              "api/shader-mount",
+              "api/shader-sizing",
+              "api/types"
+            ]
+          },
+          {
+            "group": "Utilities",
+            "pages": [
+              "api/utilities"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Zero-dependency WebGL canvas shaders",
+    "React and vanilla JavaScript support",
+    "30+ animated and static shader effects",
+    "Highly customizable parameters",
+    "Visual design tool integration with Paper",
+    "Lightweight and performant",
+    "TypeScript support with full type definitions"
+  ],
+  "publicApiSurface": [
+    "ShaderMount",
+    "MeshGradient",
+    "StaticMeshGradient",
+    "StaticRadialGradient",
+    "SmokeRing",
+    "NeuroNoise",
+    "DotOrbit",
+    "DotGrid",
+    "SimplexNoise",
+    "Metaballs",
+    "PerlinNoise",
+    "Voronoi",
+    "Waves",
+    "Warp",
+    "GodRays",
+    "Spiral",
+    "Swirl",
+    "Dithering",
+    "GrainGradient",
+    "PulsingBorder",
+    "ColorPanels",
+    "PaperTexture",
+    "Water",
+    "FlutedGlass",
+    "ImageDithering",
+    "Heatmap",
+    "LiquidMetal",
+    "HalftoneDots",
+    "HalftoneCmyk",
+    "getShaderColorFromString",
+    "getShaderNoiseTexture"
+  ]
+}
