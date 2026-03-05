@@ -26,12 +26,13 @@ function App() {
 ```
 
 ```javascript Vanilla JS
-import { createShader, metaballsFragmentShader } from '@paper-design/shaders';
+import { ShaderMount, metaballsFragmentShader } from '@paper-design/shaders';
 
-const canvas = document.getElementById('canvas');
-const shader = createShader(canvas, {
-  fragmentShader: metaballsFragmentShader,
-  uniforms: {
+const container = document.getElementById('container');
+const shader = new ShaderMount(
+  container,
+  metaballsFragmentShader,
+  {
     u_colorBack: [0, 0, 0, 1],
     u_colors: [
       [0.43, 0.2, 0.8, 1],
@@ -54,10 +55,10 @@ const shader = createShader(canvas, {
     u_originY: 0.5,
     u_worldWidth: 0,
     u_worldHeight: 0,
-  }
-});
-
-shader.start({ speed: 1 });
+  },
+  {}, // WebGL context attributes
+  1   // speed
+);
 ```
 
 </CodeGroup>

@@ -27,12 +27,13 @@ function App() {
 ```
 
 ```javascript Vanilla JS
-import { createShader, neuroNoiseFragmentShader } from '@paper-design/shaders';
+import { ShaderMount, neuroNoiseFragmentShader } from '@paper-design/shaders';
 
-const canvas = document.getElementById('canvas');
-const shader = createShader(canvas, {
-  fragmentShader: neuroNoiseFragmentShader,
-  uniforms: {
+const container = document.getElementById('container');
+const shader = new ShaderMount(
+  container,
+  neuroNoiseFragmentShader,
+  {
     u_colorFront: [1, 1, 1, 1],
     u_colorMid: [0.28, 0.65, 1, 1],
     u_colorBack: [0, 0, 0, 1],
@@ -48,10 +49,10 @@ const shader = createShader(canvas, {
     u_originY: 0.5,
     u_worldWidth: 0,
     u_worldHeight: 0,
-  }
-});
-
-shader.start({ speed: 1 });
+  },
+  {}, // WebGL context attributes
+  1   // speed
+);
 ```
 
 </CodeGroup>

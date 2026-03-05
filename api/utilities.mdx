@@ -38,7 +38,7 @@ function getShaderColorFromString(
 **Examples:**
 
 ```typescript
-import { getShaderColorFromString } from 'paper-shaders';
+import { getShaderColorFromString } from '@paper-design/shaders';
 
 // From hex
 const red = getShaderColorFromString('#ff0000');
@@ -84,7 +84,7 @@ const fallback = getShaderColorFromString(undefined);
 **Usage with ShaderMount:**
 
 ```typescript
-import { ShaderMount, getShaderColorFromString } from 'paper-shaders';
+import { ShaderMount, getShaderColorFromString } from '@paper-design/shaders';
 
 const shaderMount = new ShaderMount(
   document.getElementById('container')!,
@@ -105,7 +105,7 @@ shaderMount.setUniforms({
 **Dynamic color from user input:**
 
 ```typescript
-import { getShaderColorFromString } from 'paper-shaders';
+import { getShaderColorFromString } from '@paper-design/shaders';
 
 const colorInput = document.querySelector('input[type="color"]');
 colorInput?.addEventListener('change', (e) => {
@@ -133,7 +133,7 @@ function getShaderNoiseTexture(): HTMLImageElement | undefined
 **Example:**
 
 ```typescript
-import { ShaderMount, getShaderNoiseTexture } from 'paper-shaders';
+import { ShaderMount, getShaderNoiseTexture } from '@paper-design/shaders';
 
 const noiseTexture = getShaderNoiseTexture();
 
@@ -171,7 +171,7 @@ void main() {
 **With mipmaps for better quality:**
 
 ```typescript
-import { ShaderMount, getShaderNoiseTexture } from 'paper-shaders';
+import { ShaderMount, getShaderNoiseTexture } from '@paper-design/shaders';
 
 const noiseTexture = getShaderNoiseTexture();
 
@@ -199,7 +199,7 @@ const emptyPixel: string;
 **Example:**
 
 ```typescript
-import { emptyPixel } from 'paper-shaders';
+import { emptyPixel } from '@paper-design/shaders';
 
 const img = new Image();
 img.src = emptyPixel;
@@ -284,7 +284,7 @@ import {
   getShaderColorFromString,
   getShaderNoiseTexture,
   emptyPixel,
-} from 'paper-shaders';
+} from '@paper-design/shaders';
 
 const fragmentShader = `
   precision mediump float;

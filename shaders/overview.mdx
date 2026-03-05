@@ -77,20 +77,22 @@ function App() {
 For non-React projects, use the core package:
 
 ```javascript
-import { createShader } from '@paper-design/shaders';
-import { meshGradientFragmentShader } from '@paper-design/shaders';
+import { ShaderMount, meshGradientFragmentShader } from '@paper-design/shaders';
 
-const canvas = document.getElementById('canvas');
-const shader = createShader(canvas, {
-  fragmentShader: meshGradientFragmentShader,
-  uniforms: {
+const container = document.getElementById('container');
+const shader = new ShaderMount(
+  container,
+  meshGradientFragmentShader,
+  {
     u_colors: [[0.88, 0.92, 1, 1], [0.14, 0.11, 0.6, 1], [0.97, 0.31, 0.57, 1]],
     u_colorsCount: 3,
     u_distortion: 0.8,
     u_swirl: 0.1,
     // ... other uniforms
-  }
-});
+  },
+  {}, // WebGL context attributes
+  1   // speed
+);
 ```
 
 ## Common Parameters

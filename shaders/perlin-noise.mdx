@@ -29,12 +29,13 @@ function App() {
 ```
 
 ```javascript Vanilla JS
-import { createShader, perlinNoiseFragmentShader } from '@paper-design/shaders';
+import { ShaderMount, perlinNoiseFragmentShader } from '@paper-design/shaders';
 
-const canvas = document.getElementById('canvas');
-const shader = createShader(canvas, {
-  fragmentShader: perlinNoiseFragmentShader,
-  uniforms: {
+const container = document.getElementById('container');
+const shader = new ShaderMount(
+  container,
+  perlinNoiseFragmentShader,
+  {
     u_colorFront: [0.99, 0.81, 0.97, 1],
     u_colorBack: [0.39, 0.16, 0.84, 1],
     u_proportion: 0.35,
@@ -52,10 +53,10 @@ const shader = createShader(canvas, {
     u_originY: 0.5,
     u_worldWidth: 0,
     u_worldHeight: 0,
-  }
-});
-
-shader.start({ speed: 0.5 });
+  },
+  {}, // WebGL context attributes
+  0.5 // speed
+);
 ```
 
 </CodeGroup>

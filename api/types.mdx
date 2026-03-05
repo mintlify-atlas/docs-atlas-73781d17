@@ -21,7 +21,7 @@ type vec2 = [number, number];
 
 **Usage:**
 ```typescript
-import type { vec2 } from 'paper-shaders';
+import type { vec2 } from '@paper-design/shaders';
 
 const position: vec2 = [100, 200];
 const scale: vec2 = [1.5, 1.5];
@@ -43,7 +43,7 @@ type vec3 = [number, number, number];
 
 **Usage:**
 ```typescript
-import type { vec3 } from 'paper-shaders';
+import type { vec3 } from '@paper-design/shaders';
 
 const color: vec3 = [1.0, 0.5, 0.2]; // RGB
 const position: vec3 = [10, 20, 30]; // XYZ
@@ -64,7 +64,7 @@ type vec4 = [number, number, number, number];
 
 **Usage:**
 ```typescript
-import type { vec4 } from 'paper-shaders';
+import type { vec4 } from '@paper-design/shaders';
 
 const color: vec4 = [1.0, 0.5, 0.2, 1.0]; // RGBA
 const bounds: vec4 = [0, 0, 100, 100]; // x, y, width, height
@@ -82,7 +82,7 @@ uniform vec4 u_color; // [r, g, b, a]
 Colors in shaders use 0-1 range (not 0-255):
 
 ```typescript
-import type { vec3, vec4 } from 'paper-shaders';
+import type { vec3, vec4 } from '@paper-design/shaders';
 
 // RGB color (no alpha)
 const red: vec3 = [1.0, 0.0, 0.0];
@@ -97,7 +97,7 @@ const opaqueBlue: vec4 = [0.0, 0.0, 1.0, 1.0];
 ### Position & Scale
 
 ```typescript
-import type { vec2 } from 'paper-shaders';
+import type { vec2 } from '@paper-design/shaders';
 
 // 2D position
 const position: vec2 = [100, 200];
@@ -114,7 +114,7 @@ const stretch: vec2 = [2.0, 0.5];
 If you have color values in 0-255 range (like from CSS), convert them:
 
 ```typescript
-import type { vec4 } from 'paper-shaders';
+import type { vec4 } from '@paper-design/shaders';
 
 function rgbToVec4(r: number, g: number, b: number, a: number = 255): vec4 {
   return [r / 255, g / 255, b / 255, a / 255];
@@ -129,8 +129,8 @@ const color = rgbToVec4(255, 128, 64, 255);
 For easier color handling, use the `getShaderColorFromString` utility:
 
 ```typescript
-import { getShaderColorFromString } from 'paper-shaders';
-import type { vec4 } from 'paper-shaders';
+import { getShaderColorFromString } from '@paper-design/shaders';
+import type { vec4 } from '@paper-design/shaders';
 
 // From hex
 const color1: vec4 = getShaderColorFromString('#ff8040');
@@ -153,7 +153,7 @@ const color5: vec4 = getShaderColorFromString([1.0, 0.5, 0.25, 1.0]);
 These types provide compile-time safety for shader uniforms:
 
 ```typescript
-import { ShaderMount, type ShaderMountUniforms, type vec4 } from 'paper-shaders';
+import { ShaderMount, type ShaderMountUniforms, type vec4 } from '@paper-design/shaders';
 
 const uniforms: ShaderMountUniforms = {
   u_color1: [1.0, 0.5, 0.2, 1.0] as vec4, // ✓ Correct
@@ -173,7 +173,7 @@ const shaderMount = new ShaderMount(
 While not explicitly typed, you can use arrays for matrices:
 
 ```typescript
-import type { ShaderMountUniforms } from 'paper-shaders';
+import type { ShaderMountUniforms } from '@paper-design/shaders';
 
 // mat3 (9 elements)
 type mat3 = number[];
@@ -203,7 +203,7 @@ const uniforms: ShaderMountUniforms = {
 For arrays of vectors:
 
 ```typescript
-import type { vec4, ShaderMountUniforms } from 'paper-shaders';
+import type { vec4, ShaderMountUniforms } from '@paper-design/shaders';
 
 const colors: vec4[] = [
   [1.0, 0.0, 0.0, 1.0],

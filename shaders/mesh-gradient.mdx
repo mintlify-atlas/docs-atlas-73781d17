@@ -27,12 +27,13 @@ function App() {
 ```
 
 ```javascript Vanilla JS
-import { createShader, meshGradientFragmentShader } from '@paper-design/shaders';
+import { ShaderMount, meshGradientFragmentShader } from '@paper-design/shaders';
 
-const canvas = document.getElementById('canvas');
-const shader = createShader(canvas, {
-  fragmentShader: meshGradientFragmentShader,
-  uniforms: {
+const container = document.getElementById('container');
+const shader = new ShaderMount(
+  container,
+  meshGradientFragmentShader,
+  {
     u_colors: [
       [0.88, 0.92, 1, 1],
       [0.14, 0.11, 0.6, 1],
@@ -54,11 +55,10 @@ const shader = createShader(canvas, {
     u_originY: 0.5,
     u_worldWidth: 0,
     u_worldHeight: 0,
-  }
-});
-
-// Start animation
-shader.start({ speed: 1 });
+  },
+  {}, // WebGL context attributes
+  1   // speed
+);
 ```
 
 </CodeGroup>

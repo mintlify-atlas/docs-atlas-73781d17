@@ -29,12 +29,13 @@ function App() {
 ```
 
 ```javascript Vanilla JS
-import { createShader, staticRadialGradientFragmentShader } from '@paper-design/shaders';
+import { ShaderMount, staticRadialGradientFragmentShader } from '@paper-design/shaders';
 
-const canvas = document.getElementById('canvas');
-const shader = createShader(canvas, {
-  fragmentShader: staticRadialGradientFragmentShader,
-  uniforms: {
+const container = document.getElementById('container');
+const shader = new ShaderMount(
+  container,
+  staticRadialGradientFragmentShader,
+  {
     u_colorBack: [0, 0, 0, 1],
     u_colors: [
       [0, 0.73, 1, 1],
@@ -62,8 +63,10 @@ const shader = createShader(canvas, {
     u_originY: 0.5,
     u_worldWidth: 0,
     u_worldHeight: 0,
-  }
-});
+  },
+  {}, // WebGL context attributes
+  0   // speed
+);
 ```
 
 </CodeGroup>

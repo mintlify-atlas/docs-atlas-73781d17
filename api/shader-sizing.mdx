@@ -151,7 +151,7 @@ Use this preset for shaders that render repeating patterns or textures that shou
 ### Object Fitting
 
 ```typescript
-import { defaultObjectSizing } from 'paper-shaders';
+import { defaultObjectSizing } from '@paper-design/shaders';
 
 const sizing: ShaderSizingParams = {
   ...defaultObjectSizing,
@@ -166,7 +166,7 @@ shaderMount.setUniforms(sizing);
 ### Pattern with Offset
 
 ```typescript
-import { defaultPatternSizing } from 'paper-shaders';
+import { defaultPatternSizing } from '@paper-design/shaders';
 
 const sizing: ShaderSizingParams = {
   ...defaultPatternSizing,
@@ -195,7 +195,7 @@ shaderMount.setUniforms(sizing);
 ### Animated Rotation
 
 ```typescript
-import { ShaderMount, defaultObjectSizing } from 'paper-shaders';
+import { ShaderMount, defaultObjectSizing } from '@paper-design/shaders';
 
 let rotation = 0;
 function animate() {
