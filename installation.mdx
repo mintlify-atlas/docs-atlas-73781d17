@@ -1,0 +1,196 @@
+---
+title: Installation
+description: Install Paper Shaders in your project with npm, yarn, or pnpm
+---
+
+Paper Shaders is available in two packages: a vanilla JavaScript package and a React wrapper. Choose the package that matches your framework.
+
+## Package Options
+
+<CardGroup cols={2}>
+  <Card title="Vanilla JavaScript" icon="js">
+    `@paper-design/shaders` - Use with vanilla JS, Vue, Svelte, or any framework
+  </Card>
+  <Card title="React" icon="react">
+    `@paper-design/shaders-react` - React components with hooks support
+  </Card>
+</CardGroup>
+
+## React Installation
+
+If you're using React, install the React package which includes the core shaders as a dependency:
+
+<CodeGroup>
+```bash npm
+npm install @paper-design/shaders-react
+```
+
+```bash yarn
+yarn add @paper-design/shaders-react
+```
+
+```bash pnpm
+pnpm add @paper-design/shaders-react
+```
+</CodeGroup>
+
+### React Requirements
+
+The React package requires:
+
+- React 18 or 19
+- `@types/react` 18 or 19 (optional, for TypeScript users)
+
+<Note>
+  The React package automatically includes `@paper-design/shaders` as a dependency, so you don't need to install both.
+</Note>
+
+## Vanilla JavaScript Installation
+
+For vanilla JavaScript or other frameworks (Vue, Svelte, etc.), install the core package:
+
+<CodeGroup>
+```bash npm
+npm install @paper-design/shaders
+```
+
+```bash yarn
+yarn add @paper-design/shaders
+```
+
+```bash pnpm
+pnpm add @paper-design/shaders
+```
+</CodeGroup>
+
+## Version Pinning
+
+<Warning>
+  **Important**: Paper Shaders is currently in active development under `0.0.x` versioning. Breaking changes may be introduced in minor version updates.
+</Warning>
+
+We recommend pinning your dependency to a specific version:
+
+```json package.json
+{
+  "dependencies": {
+    "@paper-design/shaders-react": "0.0.71"
+  }
+}
+```
+
+Or use exact version matching in your install command:
+
+<CodeGroup>
+```bash npm
+npm install --save-exact @paper-design/shaders-react
+```
+
+```bash yarn
+yarn add --exact @paper-design/shaders-react
+```
+
+```bash pnpm
+pnpm add --save-exact @paper-design/shaders-react
+```
+</CodeGroup>
+
+## Package Details
+
+### @paper-design/shaders-react
+
+- **Current Version**: 0.0.71
+- **Bundle Type**: ES Module
+- **TypeScript**: Full type definitions included
+- **Dependencies**: `@paper-design/shaders@0.0.71`
+- **Peer Dependencies**: `react@^18 || ^19`
+
+### @paper-design/shaders
+
+- **Current Version**: 0.0.71
+- **Bundle Type**: ES Module
+- **TypeScript**: Full type definitions included
+- **Dependencies**: Zero
+- **Side Effects**: None
+
+## TypeScript Support
+
+Both packages include full TypeScript type definitions out of the box. No additional `@types` packages are needed.
+
+```typescript
+import { MeshGradient } from '@paper-design/shaders-react';
+import type { MeshGradientProps } from '@paper-design/shaders-react';
+
+// Full type safety and autocompletion
+const MyComponent: React.FC<MeshGradientProps> = (props) => {
+  return <MeshGradient {...props} />;
+};
+```
+
+## Verify Installation
+
+After installation, verify that the package is correctly installed:
+
+<CodeGroup>
+```javascript React
+import { MeshGradient } from '@paper-design/shaders-react';
+
+console.log(MeshGradient); // Should output the component function
+```
+
+```javascript Vanilla JS
+import { ShaderMount, meshGradientFragmentShader } from '@paper-design/shaders';
+
+console.log(ShaderMount); // Should output the ShaderMount class
+```
+</CodeGroup>
+
+## CDN Usage (Not Recommended)
+
+While Paper Shaders is designed for bundler-based workflows, you can import it from a CDN:
+
+```html
+<script type="module">
+  import { ShaderMount, meshGradientFragmentShader } from 'https://esm.sh/@paper-design/shaders@0.0.71';
+  // Your code here
+</script>
+```
+
+<Warning>
+  CDN usage is not officially supported and may have compatibility issues. We strongly recommend using a bundler like Vite, webpack, or Next.js.
+</Warning>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Quick Start" icon="rocket" href="/quickstart">
+    Create your first shader in minutes
+  </Card>
+  <Card title="React Guide" icon="react" href="/guides/react-usage">
+    Learn how to use shaders in React
+  </Card>
+</CardGroup>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Module not found errors">
+    Ensure your bundler is configured to handle ES modules. Most modern bundlers (Vite, Next.js, Create React App) handle this automatically.
+  </Accordion>
+  
+  <Accordion title="TypeScript errors">
+    Make sure you're using TypeScript 4.5 or later. The package includes its own type definitions, so no `@types` packages are needed.
+  </Accordion>
+  
+  <Accordion title="React version conflicts">
+    Paper Shaders requires React 18 or 19. Check your `package.json` to ensure compatibility:
+    
+    ```bash
+    npm list react
+    ```
+  </Accordion>
+  
+  <Accordion title="Build errors with older bundlers">
+    If you're using an older bundler that doesn't support ES modules well, try upgrading to the latest version of your bundler or switching to a modern alternative like Vite.
+  </Accordion>
+</AccordionGroup>

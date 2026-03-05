@@ -1,0 +1,421 @@
+---
+title: "React Usage"
+description: "Complete guide to using Paper Shaders in React applications"
+---
+
+## Installation
+
+Install the React package from npm:
+
+```bash
+npm install @paper-design/shaders-react
+```
+
+<Note>Pin your dependency version — breaking changes may ship under 0.0.x versioning.</Note>
+
+## Basic Usage
+
+Paper Shaders provides React components for each shader effect. Import and use them as standard React components:
+
+```jsx
+import { MeshGradient, DotOrbit } from '@paper-design/shaders-react';
+
+function App() {
+  return (
+    <div>
+      <MeshGradient
+        colors={['#5100ff', '#00ff80', '#ffcc00', '#ea00ff']}
+        distortion={1}
+        swirl={0.8}
+        speed={0.2}
+        style={{ width: 400, height: 400 }}
+      />
+    </div>
+  );
+}
+```
+
+## Available Components
+
+All shader components follow the same pattern. Here are the available shaders:
+
+<AccordionGroup>
+  <Accordion title="Gradient Shaders">
+    - `MeshGradient` - Flowing interplay of color spots with organic distortion
+    - `StaticMeshGradient` - Multi-point mesh gradients (static)
+    - `StaticRadialGradient` - Radial gradients with focal point control
+    - `GrainGradient` - Multi-color gradients with grainy textures
+  </Accordion>
+  
+  <Accordion title="Pattern Shaders">
+    - `DotOrbit` - Animated multi-color dots orbiting in cells
+    - `DotGrid` - Static grid of circles, diamonds, squares, or triangles
+    - `Voronoi` - Animated Voronoi pattern with customizable edges
+    - `Waves` - Static line patterns from zigzags to smooth waves
+  </Accordion>
+  
+  <Accordion title="Noise & Particle Shaders">
+    - `SimplexNoise` - Smooth animated curves with multi-color gradients
+    - `PerlinNoise` - Animated 3D Perlin noise
+    - `NeuroNoise` - Glowing web-like structure of fluid lines
+    - `Metaballs` - Up to 20 gooey blobs merging into organic shapes
+    - `SmokeRing` - Radial gradient shaped with layered noise
+  </Accordion>
+  
+  <Accordion title="Animation Shaders">
+    - `Swirl` - Animated bands of color twisting into spirals
+    - `Spiral` - Animated spiral morphing across shapes
+    - `Warp` - Color fields warped by noise and swirls
+    - `GodRays` - Rays of light radiating from center
+    - `PulsingBorder` - Luminous trails forming a glowing frame
+    - `ColorPanels` - Glowing 3D panels rotating around axis
+  </Accordion>
+  
+  <Accordion title="Image Filter Shaders">
+    - `Water` - Water-like surface distortion with caustics
+    - `FlutedGlass` - Streaked, ribbed glass distortions
+    - `ImageDithering` - Dithering with multiple color palettes
+    - `Heatmap` - Glowing gradient wave across images
+    - `LiquidMetal` - Futuristic liquid metal material
+    - `HalftoneDots` - Halftone-dot filter with custom grids
+    - `HalftoneCmyk` - Classic CMYK halftone algorithm
+  </Accordion>
+  
+  <Accordion title="Texture Shaders">
+    - `PaperTexture` - Realistic paper and cardboard surfaces
+    - `Dithering` - 2-color dithering over various patterns
+  </Accordion>
+</AccordionGroup>
+
+## Component Props
+
+Each shader component accepts specific parameters plus common props:
+
+### Common Props
+
+All shader components support these props:
+
+```tsx
+interface ShaderComponentProps {
+  // DOM props
+  style?: React.CSSProperties;
+  className?: string;
+  width?: string | number;  // Inline CSS width
+  height?: string | number; // Inline CSS height
+  
+  // Performance props
+  minPixelRatio?: number;      // Default: 2
+  maxPixelCount?: number;      // Default: 1920 * 1080 * 4
+  webGlContextAttributes?: WebGLContextAttributes;
+  
+  // Animation props
+  speed?: number;  // Animation speed (0 = static)
+  frame?: number;  // Starting frame for deterministic results
+  
+  // Ref
+  ref?: React.Ref<PaperShaderElement>;
+}
+```
+
+### Shader-Specific Props
+
+Each shader has its own parameters. For example, `MeshGradient`:
+
+```tsx
+interface MeshGradientProps {
+  colors?: string[];      // Up to 10 colors
+  distortion?: number;    // 0-1, organic noise distortion
+  swirl?: number;        // 0-1, vortex distortion
+  grainMixer?: number;   // 0-1, grain on shape edges
+  grainOverlay?: number; // 0-1, post-processing grain
+  
+  // Sizing props (see Sizing Guide)
+  fit?: 'none' | 'contain' | 'cover';
+  scale?: number;
+  rotation?: number;
+  offsetX?: number;
+  offsetY?: number;
+  originX?: number;
+  originY?: number;
+  worldWidth?: number;
+  worldHeight?: number;
+}
+```
+
+<Tip>Check the API reference for each shader's specific parameters.</Tip>
+
+## Using Presets
+
+Each shader includes preset configurations you can import and use:
+
+```jsx
+import { MeshGradient, meshGradientPresets } from '@paper-design/shaders-react';
+
+function App() {
+  const beachPreset = meshGradientPresets.find(p => p.name === 'Beach');
+  
+  return (
+    <MeshGradient
+      {...beachPreset.params}
+      style={{ width: 400, height: 400 }}
+    />
+  );
+}
+```
+
+Available presets are exported with each shader:
+- `meshGradientPresets`
+- `smokeRingPresets`
+- `dotOrbitPresets`
+- `waterPresets`
+- And more...
+
+## Animation Control
+
+Control animation with the `speed` and `frame` props:
+
+```jsx
+// Animated shader
+<MeshGradient speed={1} {...otherProps} />
+
+// Static shader (no animation)
+<MeshGradient speed={0} {...otherProps} />
+
+// Slow motion
+<MeshGradient speed={0.5} {...otherProps} />
+
+// Reverse animation
+<MeshGradient speed={-1} {...otherProps} />
+
+// Start at specific frame for deterministic results
+<MeshGradient speed={1} frame={5000} {...otherProps} />
+```
+
+<Note>
+When `speed={0}`, the shader pauses and requestAnimationFrame stops, 
+eliminating performance costs for static shaders.
+</Note>
+
+## Color Formats
+
+Colors can be specified in multiple formats:
+
+```jsx
+// Hex colors
+<MeshGradient colors={['#ff0000', '#00ff00']} />
+
+// RGB/RGBA
+<MeshGradient colors={['rgb(255, 0, 0)', 'rgba(0, 255, 0, 0.5)']} />
+
+// HSL/HSLA
+<MeshGradient colors={['hsl(0, 100%, 50%)', 'hsla(120, 100%, 50%, 0.5)']} />
+
+// Array notation (0-1 range)
+<MeshGradient colors={[[1, 0, 0], [0, 1, 0, 0.5]]} />
+```
+
+## Image Shaders
+
+Some shaders accept images as filters. Pass image URLs or HTMLImageElement:
+
+```jsx
+import { Water, FlutedGlass } from '@paper-design/shaders-react';
+
+// Using a URL
+<Water
+  image="/path/to/image.jpg"
+  highlights={0.3}
+  caustic={0.2}
+  speed={1}
+  style={{ width: 600, height: 400 }}
+/>
+
+// Using an imported image
+import logoUrl from './logo.png';
+
+<FlutedGlass
+  image={logoUrl}
+  distortion={0.5}
+  style={{ width: 400, height: 400 }}
+/>
+```
+
+<Warning>
+Images must be fully loaded before the shader renders. The React package 
+automatically handles image loading, but ensure CORS is configured for 
+external images.
+</Warning>
+
+## Refs and Imperative API
+
+Access the underlying shader instance via ref:
+
+```jsx
+import { useRef, useEffect } from 'react';
+import { MeshGradient, type PaperShaderElement } from '@paper-design/shaders-react';
+
+function App() {
+  const shaderRef = useRef<PaperShaderElement>(null);
+  
+  useEffect(() => {
+    const mount = shaderRef.current?.paperShaderMount;
+    if (!mount) return;
+    
+    // Imperatively control the shader
+    mount.setSpeed(2);
+    mount.setFrame(1000);
+    
+    // Get current frame
+    console.log(mount.getCurrentFrame());
+  }, []);
+  
+  return (
+    <MeshGradient
+      ref={shaderRef}
+      colors={['#ff0000', '#00ff00']}
+      style={{ width: 400, height: 400 }}
+    />
+  );
+}
+```
+
+## Server-Side Rendering
+
+Paper Shaders are marked with `'use client'` and handle SSR gracefully:
+
+```jsx
+// Next.js App Router - works out of the box
+import { MeshGradient } from '@paper-design/shaders-react';
+
+export default function Page() {
+  return <MeshGradient colors={['#ff0000', '#00ff00']} />;
+}
+```
+
+The shader canvas won't render during SSR but will mount on the client. The component reserves space so layout doesn't shift.
+
+<Tip>
+Pass `undefined` for optional props during SSR - they'll be safely ignored 
+until client hydration.
+</Tip>
+
+## Performance Optimization
+
+### Using memo
+
+All shader components are wrapped in `React.memo` with smart equality checks:
+
+```jsx
+import { memo } from 'react';
+import { MeshGradient } from '@paper-design/shaders-react';
+
+// Parent re-renders won't re-render shader unless props change
+const MyComponent = memo(() => {
+  return (
+    <MeshGradient
+      colors={['#ff0000', '#00ff00']}
+      distortion={0.8}
+    />
+  );
+});
+```
+
+### Stable References
+
+Use stable color arrays to prevent unnecessary updates:
+
+```jsx
+import { useMemo } from 'react';
+
+function App() {
+  // Good: stable reference
+  const colors = useMemo(() => ['#ff0000', '#00ff00'], []);
+  
+  return <MeshGradient colors={colors} />;
+}
+
+// Also good: define outside component
+const COLORS = ['#ff0000', '#00ff00'];
+
+function App() {
+  return <MeshGradient colors={COLORS} />;
+}
+
+// Bad: new array on every render
+function App() {
+  return <MeshGradient colors={['#ff0000', '#00ff00']} />;
+}
+```
+
+### Resolution Control
+
+See the [Performance Guide](/guides/performance) for details on `minPixelRatio` and `maxPixelCount`.
+
+## TypeScript Support
+
+Full TypeScript support with exported types:
+
+```tsx
+import type {
+  MeshGradientProps,
+  MeshGradientParams,
+  MeshGradientUniforms,
+  ShaderComponentProps,
+  PaperShaderElement,
+} from '@paper-design/shaders-react';
+
+const MyShader: React.FC<MeshGradientProps> = (props) => {
+  return <MeshGradient {...props} />;
+};
+```
+
+## Troubleshooting
+
+### Shader not rendering
+
+<Steps>
+  <Step title="Check WebGL support">
+    Paper Shaders requires WebGL 2. Check browser compatibility.
+  </Step>
+  
+  <Step title="Ensure container has size">
+    The shader matches its container size. Use `style={{ width, height }}` or CSS to size the container.
+  </Step>
+  
+  <Step title="Verify images are loaded">
+    For image shaders, ensure images are accessible and CORS-enabled.
+  </Step>
+</Steps>
+
+### Performance issues
+
+- Reduce `maxPixelCount` for lower-powered devices
+- Set `speed={0}` for static shaders
+- Use `minPixelRatio={1}` on low-end devices
+- See [Performance Guide](/guides/performance) for detailed optimization
+
+### Colors not appearing correctly
+
+- Verify color format (hex, rgb, hsl, or array)
+- Check alpha channel - colors with alpha=0 are invisible
+- Ensure color array has at least 2 colors for gradients
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Vanilla Usage" icon="js" href="/guides/vanilla-usage">
+    Learn how to use Paper Shaders without React
+  </Card>
+  
+  <Card title="Customization" icon="sliders" href="/guides/customization">
+    Deep dive into customizing shader parameters
+  </Card>
+  
+  <Card title="Sizing & Fit" icon="arrows-maximize" href="/guides/sizing-and-fit">
+    Control shader sizing and responsive behavior
+  </Card>
+  
+  <Card title="Performance" icon="gauge-high" href="/guides/performance">
+    Optimize shaders for production
+  </Card>
+</CardGroup>

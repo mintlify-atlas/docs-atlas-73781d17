@@ -1,0 +1,335 @@
+---
+title: Utility Functions
+description: Helper functions for color conversion, texture generation, and more
+---
+
+## Overview
+
+Paper Shaders provides utility functions to make working with shaders easier. These handle common tasks like color format conversion and texture generation.
+
+## Color Utilities
+
+### getShaderColorFromString
+
+Converts color strings from various formats (HSL, RGB, hex) to a 0-to-1 range RGBA array suitable for shader uniforms.
+
+```typescript
+function getShaderColorFromString(
+  colorString: string | [number, number, number] | [number, number, number, number] | undefined
+): [number, number, number, number]
+```
+
+<ParamField path="colorString" type="string | vec3 | vec4 | undefined" required>
+  The color to convert. Accepts:
+  - Hex strings: `"#ff8040"`, `"#f84"`, `"#ff804080"` (with alpha)
+  - RGB strings: `"rgb(255, 128, 64)"`
+  - RGBA strings: `"rgba(255, 128, 64, 0.5)"`
+  - HSL strings: `"hsl(20, 100%, 62%)"`
+  - HSLA strings: `"hsla(20, 100%, 62%, 0.5)"`
+  - Array of 3 numbers: `[1.0, 0.5, 0.25]` (RGB in 0-1 range)
+  - Array of 4 numbers: `[1.0, 0.5, 0.25, 1.0]` (RGBA in 0-1 range)
+  - `undefined` (returns black `[0, 0, 0, 1]`)
+</ParamField>
+
+<ResponseField name="color" type="[number, number, number, number]">
+  RGBA color array with values in 0-1 range. Always returns 4 components (adds alpha=1 if not provided).
+</ResponseField>
+
+**Examples:**
+
+```typescript
+import { getShaderColorFromString } from 'paper-shaders';
+
+// From hex
+const red = getShaderColorFromString('#ff0000');
+// Result: [1, 0, 0, 1]
+
+// From short hex
+const blue = getShaderColorFromString('#00f');
+// Result: [0, 0, 1, 1]
+
+// From hex with alpha
+const semiTransparent = getShaderColorFromString('#ff000080');
+// Result: [1, 0, 0, 0.5019607843137255]
+
+// From RGB
+const green = getShaderColorFromString('rgb(0, 255, 0)');
+// Result: [0, 1, 0, 1]
+
+// From RGBA
+const orange = getShaderColorFromString('rgba(255, 128, 0, 0.8)');
+// Result: [1, 0.5019607843137255, 0, 0.8]
+
+// From HSL
+const purple = getShaderColorFromString('hsl(270, 100%, 50%)');
+// Result: [0.5, 0, 1, 1]
+
+// From HSLA
+const pink = getShaderColorFromString('hsla(330, 100%, 75%, 0.5)');
+// Result: [1, 0.5, 0.75, 0.5]
+
+// From array (pass-through with alpha added)
+const yellow = getShaderColorFromString([1, 1, 0]);
+// Result: [1, 1, 0, 1]
+
+// From array with alpha (pass-through)
+const cyan = getShaderColorFromString([0, 1, 1, 0.5]);
+// Result: [0, 1, 1, 0.5]
+
+// Undefined fallback
+const fallback = getShaderColorFromString(undefined);
+// Result: [0, 0, 0, 1]
+```
+
+**Usage with ShaderMount:**
+
+```typescript
+import { ShaderMount, getShaderColorFromString } from 'paper-shaders';
+
+const shaderMount = new ShaderMount(
+  document.getElementById('container')!,
+  fragmentShader,
+  {
+    u_color1: getShaderColorFromString('#ff8040'),
+    u_color2: getShaderColorFromString('rgb(64, 128, 255)'),
+    u_color3: getShaderColorFromString('hsl(120, 100%, 50%)'),
+  }
+);
+
+// Update colors dynamically
+shaderMount.setUniforms({
+  u_color1: getShaderColorFromString('#00ff00'),
+});
+```
+
+**Dynamic color from user input:**
+
+```typescript
+import { getShaderColorFromString } from 'paper-shaders';
+
+const colorInput = document.querySelector('input[type="color"]');
+colorInput?.addEventListener('change', (e) => {
+  const hexColor = (e.target as HTMLInputElement).value;
+  shaderMount.setUniforms({
+    u_color: getShaderColorFromString(hexColor),
+  });
+});
+```
+
+## Texture Utilities
+
+### getShaderNoiseTexture
+
+Generates an HTMLImageElement containing a noise texture. Useful for adding grain, distortion, or randomness to shaders.
+
+```typescript
+function getShaderNoiseTexture(): HTMLImageElement | undefined
+```
+
+<ResponseField name="texture" type="HTMLImageElement | undefined">
+  An image element containing a noise texture, or `undefined` if running on the server (no `window` object).
+</ResponseField>
+
+**Example:**
+
+```typescript
+import { ShaderMount, getShaderNoiseTexture } from 'paper-shaders';
+
+const noiseTexture = getShaderNoiseTexture();
+
+const shaderMount = new ShaderMount(
+  document.getElementById('container')!,
+  fragmentShader,
+  {
+    u_noiseTexture: noiseTexture,
+    u_noiseIntensity: 0.5,
+  }
+);
+```
+
+**In your fragment shader:**
+
+```glsl
+uniform sampler2D u_noiseTexture;
+uniform float u_noiseIntensity;
+uniform vec2 u_resolution;
+
+void main() {
+  vec2 uv = gl_FragCoord.xy / u_resolution;
+  
+  // Sample the noise texture
+  float noise = texture(u_noiseTexture, uv).r;
+  
+  // Apply noise to your effect
+  vec3 color = vec3(uv.x, uv.y, 0.0);
+  color += (noise - 0.5) * u_noiseIntensity;
+  
+  gl_FragColor = vec4(color, 1.0);
+}
+```
+
+**With mipmaps for better quality:**
+
+```typescript
+import { ShaderMount, getShaderNoiseTexture } from 'paper-shaders';
+
+const noiseTexture = getShaderNoiseTexture();
+
+const shaderMount = new ShaderMount(
+  document.getElementById('container')!,
+  fragmentShader,
+  { u_noiseTexture: noiseTexture },
+  undefined, // webGlContextAttributes
+  1, // speed
+  0, // frame
+  2, // minPixelRatio
+  8294400, // maxPixelCount
+  ['u_noiseTexture'] // Enable mipmaps for this texture
+);
+```
+
+### emptyPixel
+
+A data URI for a transparent 1x1 pixel image. Useful as a placeholder or for SSR.
+
+```typescript
+const emptyPixel: string;
+```
+
+**Example:**
+
+```typescript
+import { emptyPixel } from 'paper-shaders';
+
+const img = new Image();
+img.src = emptyPixel;
+
+// Use as a placeholder
+const shaderMount = new ShaderMount(
+  document.getElementById('container')!,
+  fragmentShader,
+  {
+    u_image: img, // Transparent placeholder
+  }
+);
+
+// Load actual image later
+const actualImage = new Image();
+actualImage.onload = () => {
+  shaderMount.setUniforms({ u_image: actualImage });
+};
+actualImage.src = '/path/to/image.jpg';
+```
+
+## Helper Functions
+
+### clamp
+
+Clamps a number between a minimum and maximum value. (Internal utility, but useful reference)
+
+```typescript
+function clamp(n: number, min: number, max: number): number
+```
+
+**Example implementation:**
+```typescript
+export const clamp = (n: number, min: number, max: number): number => 
+  Math.min(Math.max(n, min), max);
+
+// Usage
+const value = clamp(150, 0, 100); // Returns 100
+const value2 = clamp(-10, 0, 100); // Returns 0
+const value3 = clamp(50, 0, 100); // Returns 50
+```
+
+## Color Format Reference
+
+### Hex Format
+
+- 3 digits: `#rgb` → expands to `#rrggbb`
+- 6 digits: `#rrggbb`
+- 8 digits: `#rrggbbaa` (with alpha)
+
+```typescript
+getShaderColorFromString('#f00');      // Red
+getShaderColorFromString('#ff0000');   // Red
+getShaderColorFromString('#ff000080'); // Semi-transparent red
+```
+
+### RGB/RGBA Format
+
+- RGB: `rgb(r, g, b)` where r, g, b are 0-255
+- RGBA: `rgba(r, g, b, a)` where r, g, b are 0-255 and a is 0-1
+
+```typescript
+getShaderColorFromString('rgb(255, 0, 0)');      // Red
+getShaderColorFromString('rgba(255, 0, 0, 0.5)'); // Semi-transparent red
+```
+
+### HSL/HSLA Format
+
+- HSL: `hsl(h, s%, l%)` where h is 0-360, s and l are 0-100%
+- HSLA: `hsla(h, s%, l%, a)` where h is 0-360, s and l are 0-100%, and a is 0-1
+
+```typescript
+getShaderColorFromString('hsl(0, 100%, 50%)');      // Red
+getShaderColorFromString('hsla(0, 100%, 50%, 0.5)'); // Semi-transparent red
+```
+
+## Complete Example
+
+```typescript
+import {
+  ShaderMount,
+  getShaderColorFromString,
+  getShaderNoiseTexture,
+  emptyPixel,
+} from 'paper-shaders';
+
+const fragmentShader = `
+  precision mediump float;
+  uniform vec2 u_resolution;
+  uniform float u_time;
+  uniform vec4 u_color1;
+  uniform vec4 u_color2;
+  uniform sampler2D u_noiseTexture;
+  uniform float u_noiseIntensity;
+  
+  void main() {
+    vec2 uv = gl_FragCoord.xy / u_resolution;
+    float noise = texture(u_noiseTexture, uv * 2.0).r;
+    
+    vec4 color = mix(u_color1, u_color2, uv.x);
+    color.rgb += (noise - 0.5) * u_noiseIntensity;
+    
+    gl_FragColor = color;
+  }
+`;
+
+const noiseTexture = getShaderNoiseTexture();
+
+const shaderMount = new ShaderMount(
+  document.getElementById('container')!,
+  fragmentShader,
+  {
+    u_color1: getShaderColorFromString('#ff6b35'),
+    u_color2: getShaderColorFromString('hsl(220, 80%, 60%)'),
+    u_noiseTexture: noiseTexture,
+    u_noiseIntensity: 0.1,
+  },
+  undefined,
+  1,
+  0,
+  2,
+  8294400,
+  ['u_noiseTexture'] // Enable mipmaps
+);
+
+// Update colors from user input
+const colorPicker = document.querySelector<HTMLInputElement>('#color-picker');
+colorPicker?.addEventListener('input', (e) => {
+  shaderMount.setUniforms({
+    u_color1: getShaderColorFromString(e.target.value),
+  });
+});
+```

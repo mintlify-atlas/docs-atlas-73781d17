@@ -1,0 +1,594 @@
+---
+title: "Vanilla JavaScript Usage"
+description: "Complete guide to using Paper Shaders with vanilla JavaScript"
+---
+
+## Installation
+
+Install the vanilla JavaScript package from npm:
+
+```bash
+npm install @paper-design/shaders
+```
+
+<Note>Pin your dependency version — breaking changes may ship under 0.0.x versioning.</Note>
+
+## Basic Usage
+
+The vanilla package provides the `ShaderMount` class for mounting shaders to DOM elements:
+
+```javascript
+import {
+  ShaderMount,
+  meshGradientFragmentShader,
+  getShaderColorFromString
+} from '@paper-design/shaders';
+
+// Get a container element
+const container = document.getElementById('shader-container');
+
+// Create uniforms
+const uniforms = {
+  u_colors: [
+    getShaderColorFromString('#5100ff'),
+    getShaderColorFromString('#00ff80'),
+    getShaderColorFromString('#ffcc00'),
+    getShaderColorFromString('#ea00ff'),
+  ],
+  u_colorsCount: 4,
+  u_distortion: 0.8,
+  u_swirl: 0.1,
+  u_grainMixer: 0,
+  u_grainOverlay: 0,
+  u_fit: 1, // 0=none, 1=contain, 2=cover
+  u_scale: 1,
+  u_rotation: 0,
+  u_offsetX: 0,
+  u_offsetY: 0,
+  u_originX: 0.5,
+  u_originY: 0.5,
+  u_worldWidth: 0,
+  u_worldHeight: 0,
+};
+
+// Mount the shader
+const shaderMount = new ShaderMount(
+  container,
+  meshGradientFragmentShader,
+  uniforms,
+  undefined, // webGlContextAttributes
+  1,         // speed (1 = normal, 0 = static)
+  0          // starting frame
+);
+```
+
+<Tip>
+The container element will automatically get a `data-paper-shader` attribute and 
+the shader canvas will be positioned absolutely to fill it.
+</Tip>
+
+## ShaderMount Constructor
+
+The `ShaderMount` class signature:
+
+```typescript
+new ShaderMount(
+  parentElement: HTMLElement,
+  fragmentShader: string,
+  uniforms: ShaderMountUniforms,
+  webGlContextAttributes?: WebGLContextAttributes,
+  speed?: number,              // Default: 0
+  frame?: number,              // Default: 0
+  minPixelRatio?: number,      // Default: 2
+  maxPixelCount?: number,      // Default: 1920 * 1080 * 4
+  mipmaps?: string[]           // Default: []
+)
+```
+
+### Parameters
+
+- **parentElement**: The DOM element to mount the shader canvas into
+- **fragmentShader**: The GLSL fragment shader code (import from package)
+- **uniforms**: Object containing uniform values for the shader
+- **webGlContextAttributes**: Optional WebGL context configuration
+- **speed**: Animation speed multiplier (0 = static, negative = reverse)
+- **frame**: Starting animation frame in milliseconds
+- **minPixelRatio**: Minimum pixel ratio for rendering (default: 2)
+- **maxPixelCount**: Maximum pixels to render (default: 1920 × 1080 × 4)
+- **mipmaps**: Array of uniform names that should use mipmaps (e.g., `['u_image']`)
+
+## Available Shaders
+
+Import fragment shaders from the package:
+
+```javascript
+import {
+  // Gradients
+  meshGradientFragmentShader,
+  staticMeshGradientFragmentShader,
+  staticRadialGradientFragmentShader,
+  grainGradientFragmentShader,
+  
+  // Patterns
+  dotOrbitFragmentShader,
+  dotGridFragmentShader,
+  voronoiFragmentShader,
+  wavesFragmentShader,
+  
+  // Noise & Particles
+  simplexNoiseFragmentShader,
+  perlinNoiseFragmentShader,
+  neuroNoiseFragmentShader,
+  metaballsFragmentShader,
+  smokeRingFragmentShader,
+  
+  // Animations
+  swirlFragmentShader,
+  spiralFragmentShader,
+  warpFragmentShader,
+  godRaysFragmentShader,
+  pulsingBorderFragmentShader,
+  colorPanelsFragmentShader,
+  
+  // Image Filters
+  waterFragmentShader,
+  flutedGlassFragmentShader,
+  imageDitheringFragmentShader,
+  heatmapFragmentShader,
+  liquidMetalFragmentShader,
+  halftoneDotsFragmentShader,
+  halftoneCmykFragmentShader,
+  
+  // Textures
+  paperTextureFragmentShader,
+  ditheringFragmentShader,
+} from '@paper-design/shaders';
+```
+
+## Uniform Types
+
+Shaders accept various uniform types:
+
+```javascript
+const uniforms = {
+  // Numbers (float)
+  u_distortion: 0.8,
+  
+  // Booleans (converted to 0 or 1)
+  u_enabled: true,
+  
+  // Arrays (vec2, vec3, vec4)
+  u_position: [0.5, 0.5],
+  u_color: [1.0, 0.0, 0.5, 1.0],
+  
+  // Array of arrays (for multiple colors, etc.)
+  u_colors: [
+    [1.0, 0.0, 0.0, 1.0],
+    [0.0, 1.0, 0.0, 1.0],
+  ],
+  
+  // Images (HTMLImageElement)
+  u_image: imageElement,
+};
+```
+
+## Working with Colors
+
+Use `getShaderColorFromString` to convert CSS colors to shader format:
+
+```javascript
+import { getShaderColorFromString } from '@paper-design/shaders';
+
+// Accepts multiple formats
+const color1 = getShaderColorFromString('#ff0000');
+const color2 = getShaderColorFromString('rgb(255, 0, 0)');
+const color3 = getShaderColorFromString('rgba(255, 0, 0, 0.5)');
+const color4 = getShaderColorFromString('hsl(0, 100%, 50%)');
+const color5 = getShaderColorFromString('hsla(0, 100%, 50%, 0.5)');
+
+// All return: [r, g, b, a] where values are 0-1 range
+// e.g., [1.0, 0.0, 0.0, 1.0]
+
+// Can also pass arrays directly
+const color6 = getShaderColorFromString([1.0, 0.0, 0.0]); // adds alpha=1
+const color7 = getShaderColorFromString([1.0, 0.0, 0.0, 0.5]);
+```
+
+## Working with Images
+
+For image-based shaders, pass loaded `HTMLImageElement` objects:
+
+```javascript
+import {
+  ShaderMount,
+  waterFragmentShader,
+  getShaderColorFromString,
+} from '@paper-design/shaders';
+
+const container = document.getElementById('shader-container');
+const image = new Image();
+
+image.onload = () => {
+  const uniforms = {
+    u_image: image,
+    u_colorBack: getShaderColorFromString('#909090'),
+    u_colorHighlight: getShaderColorFromString('#ffffff'),
+    u_highlights: 0.3,
+    u_layering: 0.5,
+    u_edges: 0.8,
+    u_waves: 0.3,
+    u_caustic: 0.1,
+    u_size: 1,
+    u_fit: 1,
+    u_scale: 1,
+    u_rotation: 0,
+    u_offsetX: 0,
+    u_offsetY: 0,
+    u_originX: 0.5,
+    u_originY: 0.5,
+    u_worldWidth: 0,
+    u_worldHeight: 0,
+  };
+  
+  const shaderMount = new ShaderMount(
+    container,
+    waterFragmentShader,
+    uniforms,
+    undefined,
+    1,     // speed
+    0,     // frame
+    2,     // minPixelRatio
+    1920 * 1080 * 4, // maxPixelCount
+    ['u_image'] // enable mipmaps for better image quality
+  );
+};
+
+image.crossOrigin = 'anonymous'; // For external images
+image.src = '/path/to/image.jpg';
+```
+
+<Warning>
+Images must be fully loaded before passing to ShaderMount. The image must have 
+`complete === true` and `naturalWidth > 0`.
+</Warning>
+
+## Updating Uniforms
+
+Update shader parameters dynamically:
+
+```javascript
+// Update one or more uniforms
+shaderMount.setUniforms({
+  u_distortion: 0.5,
+  u_swirl: 0.3,
+});
+
+// The shader automatically re-renders with new values
+```
+
+<Tip>
+Only pass the uniforms that changed - the ShaderMount caches uniform values 
+and skips unnecessary updates.
+</Tip>
+
+## Animation Control
+
+### Setting Speed
+
+```javascript
+// Start/change animation speed
+shaderMount.setSpeed(1);    // Normal speed
+shaderMount.setSpeed(0);    // Pause (stops requestAnimationFrame)
+shaderMount.setSpeed(0.5);  // Slow motion
+shaderMount.setSpeed(-1);   // Reverse
+```
+
+### Setting Frame
+
+```javascript
+// Jump to specific frame (in milliseconds)
+shaderMount.setFrame(5000);
+
+// Get current frame
+const currentFrame = shaderMount.getCurrentFrame();
+console.log(`Current frame: ${currentFrame}ms`);
+```
+
+## Performance Control
+
+### Pixel Ratio
+
+Control rendering resolution:
+
+```javascript
+// Lower resolution (better performance)
+shaderMount.setMinPixelRatio(1);
+
+// Higher resolution (better quality, especially on retina displays)
+shaderMount.setMinPixelRatio(2); // Default
+```
+
+### Max Pixel Count
+
+Limit total rendered pixels:
+
+```javascript
+// Reduce for better performance on large displays
+shaderMount.setMaxPixelCount(1920 * 1080 * 2);
+
+// Increase for higher quality on very large displays
+shaderMount.setMaxPixelCount(3840 * 2160 * 4);
+```
+
+See the [Performance Guide](/guides/performance) for detailed optimization strategies.
+
+## Cleanup
+
+Always dispose of shaders when removing them:
+
+```javascript
+// Clean up WebGL resources
+shaderMount.dispose();
+
+// The shader canvas is automatically removed from the DOM
+// All event listeners and resources are cleaned up
+```
+
+<Warning>
+Failing to dispose shaders can cause memory leaks. Always call `dispose()` when 
+removing shaders from the page.
+</Warning>
+
+## Accessing from DOM
+
+You can access the ShaderMount instance from the parent element:
+
+```javascript
+const container = document.getElementById('shader-container');
+
+// After mounting, the instance is available on the element
+if (container.paperShaderMount) {
+  container.paperShaderMount.setSpeed(2);
+  console.log(container.paperShaderMount.getCurrentFrame());
+}
+```
+
+## Automatic Behaviors
+
+### Automatic Pause
+
+Shaders automatically pause when the browser tab is hidden and resume when visible:
+
+```javascript
+// No code needed - this happens automatically
+// Saves CPU/GPU resources when tab is in background
+```
+
+### Automatic Resizing
+
+Shaders automatically resize when the container element changes size:
+
+```javascript
+// No code needed - ResizeObserver handles this automatically
+// Responds to window resize, zoom, and container size changes
+```
+
+### Pinch Zoom Support
+
+Shaders maintain quality during pinch zoom on mobile devices:
+
+```javascript
+// No code needed - automatically handled
+// Shaders re-render at appropriate resolution during zoom
+```
+
+## Complete Example
+
+Here's a complete example with all features:
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    #shader-container {
+      width: 600px;
+      height: 400px;
+      border-radius: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div id="shader-container"></div>
+  <button id="toggle">Pause/Play</button>
+  <button id="change-colors">Change Colors</button>
+  
+  <script type="module">
+    import {
+      ShaderMount,
+      meshGradientFragmentShader,
+      getShaderColorFromString,
+    } from '@paper-design/shaders';
+    
+    const container = document.getElementById('shader-container');
+    
+    const uniforms = {
+      u_colors: [
+        getShaderColorFromString('#5100ff'),
+        getShaderColorFromString('#00ff80'),
+        getShaderColorFromString('#ffcc00'),
+        getShaderColorFromString('#ea00ff'),
+      ],
+      u_colorsCount: 4,
+      u_distortion: 0.8,
+      u_swirl: 0.1,
+      u_grainMixer: 0,
+      u_grainOverlay: 0,
+      u_fit: 1,
+      u_scale: 1,
+      u_rotation: 0,
+      u_offsetX: 0,
+      u_offsetY: 0,
+      u_originX: 0.5,
+      u_originY: 0.5,
+      u_worldWidth: 0,
+      u_worldHeight: 0,
+    };
+    
+    const shaderMount = new ShaderMount(
+      container,
+      meshGradientFragmentShader,
+      uniforms,
+      undefined,
+      1, // speed
+      0  // frame
+    );
+    
+    // Toggle animation
+    let isPlaying = true;
+    document.getElementById('toggle').addEventListener('click', () => {
+      isPlaying = !isPlaying;
+      shaderMount.setSpeed(isPlaying ? 1 : 0);
+    });
+    
+    // Change colors
+    document.getElementById('change-colors').addEventListener('click', () => {
+      shaderMount.setUniforms({
+        u_colors: [
+          getShaderColorFromString('#ff0000'),
+          getShaderColorFromString('#00ff00'),
+          getShaderColorFromString('#0000ff'),
+          getShaderColorFromString('#ffff00'),
+        ],
+      });
+    });
+    
+    // Clean up on page unload
+    window.addEventListener('beforeunload', () => {
+      shaderMount.dispose();
+    });
+  </script>
+</body>
+</html>
+```
+
+## Using Shader Metadata
+
+Some shaders export metadata for dynamic usage:
+
+```javascript
+import {
+  meshGradientFragmentShader,
+  meshGradientMeta,
+} from '@paper-design/shaders';
+
+console.log(meshGradientMeta.maxColorCount); // 10
+
+// Use this to validate color arrays
+if (colors.length > meshGradientMeta.maxColorCount) {
+  console.warn('Too many colors!');
+}
+```
+
+## Fit Options
+
+Use `ShaderFitOptions` for sizing:
+
+```javascript
+import { ShaderFitOptions } from '@paper-design/shaders';
+
+const uniforms = {
+  // ... other uniforms
+  u_fit: ShaderFitOptions.contain, // or .none or .cover
+};
+
+// Values:
+// ShaderFitOptions.none = 0
+// ShaderFitOptions.contain = 1
+// ShaderFitOptions.cover = 2
+```
+
+See [Sizing & Fit Guide](/guides/sizing-and-fit) for details.
+
+## TypeScript Support
+
+Full TypeScript definitions are included:
+
+```typescript
+import type {
+  ShaderMount,
+  ShaderMountUniforms,
+  ShaderMotionParams,
+  MeshGradientUniforms,
+  MeshGradientParams,
+  PaperShaderElement,
+} from '@paper-design/shaders';
+
+const uniforms: MeshGradientUniforms = {
+  u_colors: [
+    [1, 0, 0, 1],
+    [0, 1, 0, 1],
+  ],
+  u_colorsCount: 2,
+  u_distortion: 0.8,
+  // ... TypeScript ensures all required uniforms are present
+};
+```
+
+## Troubleshooting
+
+### Shader not rendering
+
+<Steps>
+  <Step title="Check WebGL support">
+    Paper Shaders requires WebGL 2:
+    ```javascript
+    const canvas = document.createElement('canvas');
+    const gl = canvas.getContext('webgl2');
+    if (!gl) {
+      console.error('WebGL 2 not supported');
+    }
+    ```
+  </Step>
+  
+  <Step title="Verify container has size">
+    The container must have width and height (via CSS or inline styles).
+  </Step>
+  
+  <Step title="Check console for errors">
+    Look for WebGL shader compilation errors in the browser console.
+  </Step>
+</Steps>
+
+### Memory leaks
+
+- Always call `shaderMount.dispose()` when removing shaders
+- Remove event listeners if you added custom ones
+- Clear references to the ShaderMount instance
+
+### Images not loading
+
+- Ensure images are fully loaded before passing to ShaderMount
+- Set `crossOrigin = 'anonymous'` for external images
+- Check network tab for failed image requests
+- Verify CORS headers for cross-origin images
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="React Usage" icon="react" href="/guides/react-usage">
+    Use Paper Shaders in React applications
+  </Card>
+  
+  <Card title="Customization" icon="sliders" href="/guides/customization">
+    Deep dive into customizing shader parameters
+  </Card>
+  
+  <Card title="Sizing & Fit" icon="arrows-maximize" href="/guides/sizing-and-fit">
+    Control shader sizing and responsive behavior
+  </Card>
+  
+  <Card title="Performance" icon="gauge-high" href="/guides/performance">
+    Optimize shaders for production
+  </Card>
+</CardGroup>

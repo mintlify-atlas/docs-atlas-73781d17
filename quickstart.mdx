@@ -1,80 +1,449 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: Quick Start
+description: Create your first Paper Shader in under 5 minutes
 ---
 
-## Get started in three steps
+This guide will help you create your first animated shader. We'll build a beautiful mesh gradient background in both React and vanilla JavaScript.
 
-Get your documentation site running locally and make your first customization.
+## React Quick Start
 
-### Step 1: Set up your local environment
-
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
+<Steps>
+  <Step title="Install the package">
+    If you haven't already, install the React package:
     
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
+    ```bash
+    npm install @paper-design/shaders-react
+    ```
+  </Step>
+
+  <Step title="Import and use a shader component">
+    Import any shader component and add it to your React component:
     
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
+    ```jsx App.jsx
+    import { MeshGradient } from '@paper-design/shaders-react';
 
-### Step 2: Deploy your changes
+    function App() {
+      return (
+        <div style={{ position: 'relative', width: '100vw', height: '100vh' }}>
+          <MeshGradient
+            colors={['#5100ff', '#00ff80', '#ffcc00', '#ea00ff']}
+            distortion={1}
+            swirl={0.8}
+            speed={0.2}
+            style={{ width: '100%', height: '100%' }}
+          />
+        </div>
+      );
+    }
 
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
+    export default App;
+    ```
+  </Step>
+
+  <Step title="Customize your shader">
+    Adjust the parameters to customize the appearance:
     
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
-
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
-
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
-
-### Step 3: Go live
-
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
-
-## Next steps
-
-Now that you have your docs running, explore these key features:
-
-<CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
-</CardGroup>
+    ```jsx
+    <MeshGradient
+      colors={['#e0eaff', '#241d9a', '#f75092', '#9f50d3']}
+      distortion={0.5}  // Lower distortion for smoother shapes
+      swirl={0.1}       // Reduce swirl effect
+      speed={1}         // Faster animation
+      grainMixer={0.2}  // Add grain texture
+      style={{ width: '100%', height: '100%' }}
+    />
+    ```
+  </Step>
+</Steps>
 
 <Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
+  The shader automatically creates a `<canvas>` element that matches the dimensions of its parent container.
 </Note>
+
+## Vanilla JavaScript Quick Start
+
+<Steps>
+  <Step title="Install the package">
+    Install the vanilla JavaScript package:
+    
+    ```bash
+    npm install @paper-design/shaders
+    ```
+  </Step>
+
+  <Step title="Create a container element">
+    Add a container element in your HTML:
+    
+    ```html index.html
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Paper Shaders Demo</title>
+      <style>
+        body {
+          margin: 0;
+          padding: 0;
+        }
+        #shader-container {
+          position: relative;
+          width: 100vw;
+          height: 100vh;
+        }
+      </style>
+    </head>
+    <body>
+      <div id="shader-container"></div>
+      <script type="module" src="./main.js"></script>
+    </body>
+    </html>
+    ```
+  </Step>
+
+  <Step title="Initialize the shader">
+    Create a shader using the `ShaderMount` class:
+    
+    ```javascript main.js
+    import {
+      ShaderMount,
+      meshGradientFragmentShader,
+      getShaderColorFromString,
+      ShaderFitOptions,
+      defaultObjectSizing
+    } from '@paper-design/shaders';
+
+    // Get the container element
+    const container = document.getElementById('shader-container');
+
+    // Define your shader uniforms
+    const uniforms = {
+      // Color configuration
+      u_colors: [
+        '#5100ff',
+        '#00ff80',
+        '#ffcc00',
+        '#ea00ff'
+      ].map(getShaderColorFromString),
+      u_colorsCount: 4,
+      
+      // Visual parameters
+      u_distortion: 1,
+      u_swirl: 0.8,
+      u_grainMixer: 0,
+      u_grainOverlay: 0,
+      
+      // Sizing parameters
+      u_fit: ShaderFitOptions[defaultObjectSizing.fit],
+      u_rotation: 0,
+      u_scale: 1,
+      u_offsetX: 0,
+      u_offsetY: 0,
+      u_originX: 0.5,
+      u_originY: 0.5,
+      u_worldWidth: 1000,
+      u_worldHeight: 1000,
+    };
+
+    // Create the shader mount
+    const shader = new ShaderMount(
+      container,
+      meshGradientFragmentShader,
+      uniforms,
+      {}, // WebGL context attributes
+      0.2, // speed
+      0    // starting frame
+    );
+
+    // Clean up when done (e.g., on page navigation)
+    // shader.dispose();
+    ```
+  </Step>
+
+  <Step title="Update shader parameters (optional)">
+    You can dynamically update shader parameters:
+    
+    ```javascript
+    // Update colors
+    shader.setUniforms({
+      u_colors: [
+        '#e0eaff',
+        '#241d9a',
+        '#f75092',
+        '#9f50d3'
+      ].map(getShaderColorFromString),
+      u_distortion: 0.5,
+    });
+
+    // Change animation speed
+    shader.setSpeed(1);
+
+    // Pause animation
+    shader.setSpeed(0);
+    ```
+  </Step>
+</Steps>
+
+## Try Other Shaders
+
+Paper Shaders includes many different effects. Here are some popular ones:
+
+<CodeGroup>
+```jsx DotOrbit
+import { DotOrbit } from '@paper-design/shaders-react';
+
+<DotOrbit
+  colors={['#d2822d', '#0c3b7e', '#b31a57', '#37a066']}
+  colorBack={'#000000'}
+  scale={0.3}
+  speed={0.5}
+  style={{ width: '100%', height: '100%' }}
+/>
+```
+
+```jsx SmokeRing
+import { SmokeRing } from '@paper-design/shaders-react';
+
+<SmokeRing
+  colors={['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24']}
+  speed={0.3}
+  scale={1.2}
+  style={{ width: '100%', height: '100%' }}
+/>
+```
+
+```jsx Metaballs
+import { Metaballs } from '@paper-design/shaders-react';
+
+<Metaballs
+  colors={['#667eea', '#764ba2', '#f093fb', '#4facfe']}
+  count={8}
+  speed={0.4}
+  style={{ width: '100%', height: '100%' }}
+/>
+```
+
+```jsx GodRays
+import { GodRays } from '@paper-design/shaders-react';
+
+<GodRays
+  colors={['#ffd89b', '#19547b']}
+  density={0.5}
+  speed={0.2}
+  style={{ width: '100%', height: '100%' }}
+/>
+```
+</CodeGroup>
+
+## Common Patterns
+
+### Full-Page Background
+
+```jsx
+import { MeshGradient } from '@paper-design/shaders-react';
+
+function Layout({ children }) {
+  return (
+    <div style={{ position: 'relative', minHeight: '100vh' }}>
+      {/* Background shader */}
+      <MeshGradient
+        colors={['#5100ff', '#00ff80', '#ffcc00', '#ea00ff']}
+        distortion={1}
+        swirl={0.8}
+        speed={0.2}
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          zIndex: -1,
+        }}
+      />
+      
+      {/* Content on top */}
+      <div style={{ position: 'relative', zIndex: 1 }}>
+        {children}
+      </div>
+    </div>
+  );
+}
+```
+
+### Static Shader (No Animation)
+
+For better performance, set `speed={0}` to disable animation:
+
+```jsx
+<MeshGradient
+  colors={['#5100ff', '#00ff80', '#ffcc00', '#ea00ff']}
+  distortion={1}
+  swirl={0.8}
+  speed={0}  // No animation, zero performance cost
+  frame={42} // Frozen at a specific frame
+  style={{ width: '100%', height: '100%' }}
+/>
+```
+
+### Card Background
+
+```jsx
+function Card({ children }) {
+  return (
+    <div style={{
+      position: 'relative',
+      width: 300,
+      height: 200,
+      borderRadius: 16,
+      overflow: 'hidden',
+      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+    }}>
+      <MeshGradient
+        colors={['#667eea', '#764ba2']}
+        distortion={0.5}
+        swirl={0.2}
+        speed={0.1}
+        style={{ width: '100%', height: '100%' }}
+      />
+      <div style={{
+        position: 'absolute',
+        inset: 0,
+        padding: 24,
+        color: 'white',
+      }}>
+        {children}
+      </div>
+    </div>
+  );
+}
+```
+
+### Masked with Text
+
+```jsx
+function HeroText() {
+  return (
+    <div style={{ position: 'relative', display: 'inline-block' }}>
+      <h1 style={{
+        fontSize: 120,
+        fontWeight: 900,
+        margin: 0,
+        background: 'linear-gradient(to bottom, #000, #000)',
+        backgroundClip: 'text',
+        WebkitBackgroundClip: 'text',
+        color: 'transparent',
+        position: 'relative',
+        zIndex: 2,
+        mixBlendMode: 'multiply',
+      }}>
+        HELLO
+      </h1>
+      <MeshGradient
+        colors={['#5100ff', '#00ff80', '#ffcc00', '#ea00ff']}
+        distortion={1}
+        swirl={0.8}
+        speed={0.3}
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          zIndex: 1,
+        }}
+      />
+    </div>
+  );
+}
+```
+
+## Performance Tips
+
+<Tip>
+  Set `speed={0}` for static shaders to completely eliminate animation overhead and achieve zero ongoing performance cost.
+</Tip>
+
+<Tip>
+  The shader automatically limits resolution based on device capabilities. You can adjust `minPixelRatio` and `maxPixelCount` props for fine-tuning.
+</Tip>
+
+<Tip>
+  Shaders pause automatically when the browser tab is hidden to save resources.
+</Tip>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="React Guide" icon="react" href="/guides/react-usage">
+    Learn about all React shader components and their props
+  </Card>
+  <Card title="Vanilla JS Guide" icon="js" href="/guides/vanilla-usage">
+    Deep dive into the ShaderMount API for vanilla JavaScript
+  </Card>
+  <Card title="Shader Gallery" icon="images" href="/shaders/overview">
+    Explore all available shaders with live examples
+  </Card>
+  <Card title="API Reference" icon="book" href="/api/shader-mount">
+    Complete API documentation and type definitions
+  </Card>
+</CardGroup>
+
+## Common Issues
+
+<AccordionGroup>
+  <Accordion title="Shader not visible">
+    Make sure the parent container has a defined width and height. The shader canvas matches its parent's dimensions.
+    
+    ```jsx
+    {/* ❌ Parent has no height */}
+    <div>
+      <MeshGradient colors={['#ff0000', '#0000ff']} />
+    </div>
+
+    {/* ✅ Parent has explicit height */}
+    <div style={{ width: 400, height: 300 }}>
+      <MeshGradient colors={['#ff0000', '#0000ff']} />
+    </div>
+    ```
+  </Accordion>
+  
+  <Accordion title="WebGL not supported error">
+    Paper Shaders requires WebGL2 support. Ensure you're testing in a modern browser:
+    - Chrome 56+
+    - Firefox 51+
+    - Safari 15+
+    - Edge 79+
+  </Accordion>
+  
+  <Accordion title="Performance issues">
+    Try these optimizations:
+    1. Set `speed={0}` if animation isn't needed
+    2. Reduce the shader size using CSS
+    3. Lower the `minPixelRatio` prop (default is 2)
+    4. Set a lower `maxPixelCount` to cap resolution
+    
+    ```jsx
+    <MeshGradient
+      colors={['#ff0000', '#0000ff']}
+      minPixelRatio={1}  // Lower quality but better performance
+      maxPixelCount={1920 * 1080}  // Cap at 1080p
+    />
+    ```
+  </Accordion>
+  
+  <Accordion title="Colors not working as expected">
+    Colors should be provided as CSS color strings. Valid formats:
+    - Hex: `'#ff0000'` or `'#f00'`
+    - RGB: `'rgb(255, 0, 0)'`
+    - RGBA: `'rgba(255, 0, 0, 0.5)'`
+    - Named: `'red'`
+    
+    ```jsx
+    {/* ✅ Valid */}
+    <MeshGradient colors={['#ff0000', 'rgba(0, 255, 0, 0.8)', 'blue']} />
+    
+    {/* ❌ Invalid */}
+    <MeshGradient colors={[0xff0000, [255, 0, 0]]} />
+    ```
+  </Accordion>
+</AccordionGroup>

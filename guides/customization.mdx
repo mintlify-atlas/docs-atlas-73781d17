@@ -1,0 +1,638 @@
+---
+title: "Customization"
+description: "Guide to customizing shaders with colors, parameters, and presets"
+---
+
+## Overview
+
+Paper Shaders are highly customizable through parameters that control colors, animation, distortion, and visual effects. This guide covers how to customize shaders to match your design needs.
+
+## Using Presets
+
+Each shader comes with carefully crafted presets that showcase different aesthetics:
+
+<Tabs>
+  <Tab title="React">
+    ```jsx
+    import { MeshGradient, meshGradientPresets } from '@paper-design/shaders-react';
+    
+    function App() {
+      // Find a preset by name
+      const beachPreset = meshGradientPresets.find(p => p.name === 'Beach');
+      
+      return (
+        <MeshGradient
+          {...beachPreset.params}
+          style={{ width: 400, height: 400 }}
+        />
+      );
+    }
+    ```
+  </Tab>
+  
+  <Tab title="Vanilla JS">
+    ```javascript
+    // Presets aren't exported in vanilla package
+    // But you can reference them from React package source
+    // Or define your own preset objects
+    
+    const beachPreset = {
+      colors: ['#bcecf6', '#00aaff', '#00f7ff', '#ffd447'],
+      distortion: 0.8,
+      swirl: 0.35,
+      speed: 0.1,
+    };
+    ```
+  </Tab>
+</Tabs>
+
+### Available Preset Exports
+
+Each shader component exports its presets:
+
+```javascript
+import {
+  meshGradientPresets,
+  smokeRingPresets,
+  neuroNoisePresets,
+  dotOrbitPresets,
+  dotGridPresets,
+  simplexNoisePresets,
+  metaballsPresets,
+  wavesPresets,
+  perlinNoisePresets,
+  voronoiPresets,
+  warpPresets,
+  godRaysPresets,
+  spiralPresets,
+  swirlPresets,
+  ditheringPresets,
+  grainGradientPresets,
+  pulsingBorderPresets,
+  colorPanelsPresets,
+  staticMeshGradientPresets,
+  staticRadialGradientPresets,
+  paperTexturePresets,
+  flutedGlassPresets,
+  waterPresets,
+  imageDitheringPresets,
+  heatmapPresets,
+  liquidMetalPresets,
+  halftoneDotsPresets,
+  halftoneCmykPresets,
+} from '@paper-design/shaders-react';
+```
+
+## Color Customization
+
+### Color Formats
+
+Shaders accept colors in multiple formats:
+
+<Tabs>
+  <Tab title="React">
+    ```jsx
+    // Hex colors (most common)
+    <MeshGradient colors={['#5100ff', '#00ff80', '#ffcc00']} />
+    
+    // RGB/RGBA
+    <MeshGradient colors={['rgb(81, 0, 255)', 'rgba(0, 255, 128, 0.8)']} />
+    
+    // HSL/HSLA
+    <MeshGradient colors={['hsl(258, 100%, 50%)', 'hsla(150, 100%, 50%, 0.8)']} />
+    
+    // Array notation (0-1 range RGBA)
+    <MeshGradient colors={[
+      [0.32, 0, 1, 1],      // RGB + alpha
+      [0, 1, 0.5, 0.8]       // RGB + alpha
+    ]} />
+    ```
+  </Tab>
+  
+  <Tab title="Vanilla JS">
+    ```javascript
+    import { getShaderColorFromString } from '@paper-design/shaders';
+    
+    const uniforms = {
+      u_colors: [
+        getShaderColorFromString('#5100ff'),
+        getShaderColorFromString('rgb(0, 255, 128)'),
+        getShaderColorFromString('hsl(258, 100%, 50%)'),
+        [0.32, 0, 1, 1], // Can also pass arrays directly
+      ],
+      u_colorsCount: 4,
+    };
+    ```
+  </Tab>
+</Tabs>
+
+### Color Limits
+
+Each shader has a maximum color count:
+
+```javascript
+import { meshGradientMeta } from '@paper-design/shaders';
+
+console.log(meshGradientMeta.maxColorCount); // 10
+```
+
+Common limits:
+- **MeshGradient**: 10 colors
+- **DotOrbit**: 40 colors
+- **GodRays**: 5 colors
+- **Warp**: 10 colors
+- **StaticMeshGradient**: 10 colors
+- **StaticRadialGradient**: 10 colors
+
+### Working with Alpha
+
+Colors support transparency:
+
+```jsx
+// 50% transparent colors
+<MeshGradient colors={[
+  '#5100ff80',                    // Hex with alpha
+  'rgba(0, 255, 128, 0.5)',      // RGBA
+  'hsla(258, 100%, 50%, 0.5)',   // HSLA
+  [0.32, 0, 1, 0.5]              // Array with alpha
+]} />
+```
+
+<Tip>
+Transparent colors let background elements show through, enabling layered effects.
+</Tip>
+
+## Parameter Ranges
+
+Most shader parameters use normalized 0-1 ranges for consistency:
+
+### Common Parameters
+
+```jsx
+<MeshGradient
+  distortion={0.8}    // 0-1: organic noise distortion
+  swirl={0.1}         // 0-1: vortex distortion
+  grainMixer={0}      // 0-1: grain on shape edges
+  grainOverlay={0}    // 0-1: post-processing grain
+  speed={1}           // 0+: animation speed (can be negative)
+/>
+```
+
+### Speed Parameter
+
+The `speed` parameter is special:
+
+```jsx
+// Normal animation
+<MeshGradient speed={1} />
+
+// Static (no animation, no performance cost)
+<MeshGradient speed={0} />
+
+// Slow motion
+<MeshGradient speed={0.5} />
+
+// Fast
+<MeshGradient speed={2} />
+
+// Reverse
+<MeshGradient speed={-1} />
+```
+
+<Note>
+When `speed={0}`, requestAnimationFrame stops entirely, making static shaders 
+completely free from ongoing performance costs.
+</Note>
+
+### Frame Parameter
+
+Set starting frame for deterministic results:
+
+```jsx
+// Start at 5 seconds in
+<MeshGradient speed={1} frame={5000} />
+
+// Useful for:
+// - Matching animation state across multiple shaders
+// - Creating consistent screenshots/thumbnails
+// - Synchronized animations
+```
+
+## Shader-Specific Parameters
+
+### MeshGradient
+
+```jsx
+<MeshGradient
+  colors={['#e0eaff', '#241d9a', '#f75092', '#9f50d3']}
+  distortion={0.8}     // Organic noise (0-1)
+  swirl={0.1}          // Vortex effect (0-1)
+  grainMixer={0}       // Edge grain (0-1)
+  grainOverlay={0}     // Overall grain (0-1)
+  speed={1}
+  
+  // Sizing (see Sizing guide)
+  fit="contain"
+  scale={1}
+  rotation={0}
+/>
+```
+
+### DotOrbit
+
+```jsx
+<DotOrbit
+  colors={['#d2822d', '#0c3b7e', '#b31a57', '#37a066']}
+  colorBack="#000000"  // Background color
+  scale={0.3}          // Dot size (0.1-2)
+  speed={1}            // Orbit speed
+  dotShape={1}         // 0=circle, 1=soft, 2=ring, 3=square
+  dotSize={0.5}        // Individual dot size (0-1)
+  fadeToCenter={0}     // Center fade (0-1)
+  animateSize={0}      // Size animation (0-1)
+/>
+```
+
+### Water (Image Filter)
+
+```jsx
+<Water
+  image="/path/to/image.jpg"
+  colorBack="#909090"
+  colorHighlight="#ffffff"
+  highlights={0.3}     // Highlight intensity (0-1)
+  layering={0.5}       // Depth layers (0-1)
+  edges={0.8}          // Edge detection (0-1)
+  waves={0.3}          // Wave distortion (0-1)
+  caustic={0.1}        // Light caustics (0-1)
+  size={1}             // Effect scale (0-2)
+  speed={1}
+/>
+```
+
+### Warp
+
+```jsx
+import { WarpPatterns } from '@paper-design/shaders';
+
+<Warp
+  colors={['#ff0000', '#00ff00', '#0000ff']}
+  pattern={WarpPatterns.checks}  // checks, stripes, split
+  distortion={0.5}     // Noise distortion (0-1)
+  swirl={0.5}          // Swirl effect (0-1)
+  softness={0.5}       // Color blend (0-1)
+  speed={1}
+/>
+```
+
+### GodRays
+
+```jsx
+<GodRays
+  colors={['#ff0000', '#ffff00', '#ffffff']}
+  raySize={0.5}        // Ray thickness (0-1)
+  rayDensity={0.5}     // Number of rays (0-1)
+  brightness={0.7}     // Overall brightness (0-1)
+  centerGlow={0.3}     // Center light (0-1)
+  speed={1}
+/>
+```
+
+<Tip>
+Experiment with parameters in Paper (the visual editor) or check the API 
+reference for complete parameter lists.
+</Tip>
+
+## Dynamic Updates
+
+Update parameters in response to user interaction:
+
+<Tabs>
+  <Tab title="React">
+    ```jsx
+    import { useState } from 'react';
+    import { MeshGradient } from '@paper-design/shaders-react';
+    
+    function App() {
+      const [distortion, setDistortion] = useState(0.8);
+      const [swirl, setSwirl] = useState(0.1);
+      
+      return (
+        <div>
+          <MeshGradient
+            colors={['#5100ff', '#00ff80', '#ffcc00']}
+            distortion={distortion}
+            swirl={swirl}
+            style={{ width: 400, height: 400 }}
+          />
+          
+          <label>
+            Distortion: {distortion.toFixed(2)}
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.01"
+              value={distortion}
+              onChange={(e) => setDistortion(Number(e.target.value))}
+            />
+          </label>
+          
+          <label>
+            Swirl: {swirl.toFixed(2)}
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.01"
+              value={swirl}
+              onChange={(e) => setSwirl(Number(e.target.value))}
+            />
+          </label>
+        </div>
+      );
+    }
+    ```
+  </Tab>
+  
+  <Tab title="Vanilla JS">
+    ```javascript
+    const distortionSlider = document.getElementById('distortion');
+    const swirlSlider = document.getElementById('swirl');
+    
+    distortionSlider.addEventListener('input', (e) => {
+      shaderMount.setUniforms({
+        u_distortion: Number(e.target.value),
+      });
+    });
+    
+    swirlSlider.addEventListener('input', (e) => {
+      shaderMount.setUniforms({
+        u_swirl: Number(e.target.value),
+      });
+    });
+    ```
+  </Tab>
+</Tabs>
+
+## Combining Shaders
+
+Layer multiple shaders for complex effects:
+
+```jsx
+function LayeredShaders() {
+  return (
+    <div style={{ position: 'relative', width: 400, height: 400 }}>
+      {/* Background gradient */}
+      <MeshGradient
+        colors={['#000000', '#1a1a2e']}
+        speed={0.5}
+        style={{ position: 'absolute', inset: 0 }}
+      />
+      
+      {/* Overlay texture */}
+      <PaperTexture
+        colorMix={0.1}
+        grainIntensity={0.3}
+        speed={0}
+        style={{
+          position: 'absolute',
+          inset: 0,
+          mixBlendMode: 'overlay',
+          opacity: 0.3,
+        }}
+      />
+      
+      {/* Top pattern */}
+      <DotOrbit
+        colors={['#00ff88', '#0088ff']}
+        colorBack="transparent"
+        scale={0.3}
+        speed={1}
+        style={{
+          position: 'absolute',
+          inset: 0,
+          mixBlendMode: 'screen',
+        }}
+      />
+    </div>
+  );
+}
+```
+
+<Tip>
+Use CSS `mix-blend-mode` and `opacity` to blend shaders together creatively.
+</Tip>
+
+## Responsive Parameters
+
+Adjust parameters based on screen size:
+
+```jsx
+import { useState, useEffect } from 'react';
+
+function ResponsiveShader() {
+  const [isMobile, setIsMobile] = useState(false);
+  
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+  
+  return (
+    <MeshGradient
+      colors={['#5100ff', '#00ff80', '#ffcc00']}
+      speed={isMobile ? 0.5 : 1}         // Slower on mobile
+      distortion={isMobile ? 0.5 : 0.8}  // Less distortion on mobile
+      maxPixelCount={isMobile ? 1920 * 1080 : 1920 * 1080 * 4}
+      style={{ width: '100%', height: isMobile ? 300 : 500 }}
+    />
+  );
+}
+```
+
+## Color Palette Tools
+
+### Generating Complementary Colors
+
+```javascript
+// Helper to generate color variations
+function generatePalette(baseColor, count) {
+  const hue = parseInt(baseColor.slice(1, 3), 16);
+  const palette = [];
+  
+  for (let i = 0; i < count; i++) {
+    const offset = (360 / count) * i;
+    const newHue = (hue + offset) % 360;
+    palette.push(`hsl(${newHue}, 70%, 50%)`);
+  }
+  
+  return palette;
+}
+
+const colors = generatePalette('#5100ff', 4);
+```
+
+### Color Interpolation
+
+```javascript
+// Interpolate between two colors
+function interpolateColors(color1, color2, steps) {
+  const c1 = getShaderColorFromString(color1);
+  const c2 = getShaderColorFromString(color2);
+  const colors = [];
+  
+  for (let i = 0; i < steps; i++) {
+    const t = i / (steps - 1);
+    colors.push([
+      c1[0] + (c2[0] - c1[0]) * t,
+      c1[1] + (c2[1] - c1[1]) * t,
+      c1[2] + (c2[2] - c1[2]) * t,
+      c1[3] + (c2[3] - c1[3]) * t,
+    ]);
+  }
+  
+  return colors;
+}
+```
+
+## Best Practices
+
+### Performance-Conscious Customization
+
+<Steps>
+  <Step title="Use static shaders when possible">
+    Set `speed={0}` for backgrounds that don't need animation.
+  </Step>
+  
+  <Step title="Limit color count">
+    More colors = more GPU calculations. Use 3-5 colors for best performance.
+  </Step>
+  
+  <Step title="Reduce parameters on mobile">
+    Lower distortion, grain, and other effects on mobile devices.
+  </Step>
+  
+  <Step title="Test on target devices">
+    Always test customizations on actual devices, not just desktop.
+  </Step>
+</Steps>
+
+### Visual Quality Tips
+
+<AccordionGroup>
+  <Accordion title="Color Harmony">
+    - Use complementary colors (opposite on color wheel) for vibrant looks
+    - Use analogous colors (adjacent on color wheel) for harmony
+    - Include one darker color for depth
+    - Test with different backgrounds
+  </Accordion>
+  
+  <Accordion title="Animation Speed">
+    - Subtle effects: 0.2-0.5 speed
+    - Standard: 0.8-1.2 speed
+    - Energetic: 1.5-2.5 speed
+    - Match speed to your brand personality
+  </Accordion>
+  
+  <Accordion title="Parameter Balance">
+    - Start with preset as baseline
+    - Adjust one parameter at a time
+    - Avoid maxing out all effects (looks noisy)
+    - Less is often more
+  </Accordion>
+</AccordionGroup>
+
+## Preset Switching
+
+Create smooth preset transitions:
+
+```jsx
+import { useState } from 'react';
+import { MeshGradient, meshGradientPresets } from '@paper-design/shaders-react';
+
+function PresetSwitcher() {
+  const [presetIndex, setPresetIndex] = useState(0);
+  const currentPreset = meshGradientPresets[presetIndex];
+  
+  return (
+    <div>
+      <MeshGradient
+        {...currentPreset.params}
+        style={{
+          width: 400,
+          height: 400,
+          transition: 'all 0.5s ease', // Smooth transitions
+        }}
+      />
+      
+      <div>
+        {meshGradientPresets.map((preset, i) => (
+          <button
+            key={preset.name}
+            onClick={() => setPresetIndex(i)}
+            disabled={i === presetIndex}
+          >
+            {preset.name}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+```
+
+<Warning>
+CSS transitions only work on the container element, not shader parameters. 
+For parameter transitions, use state and interpolate values over time.
+</Warning>
+
+## Saving Custom Presets
+
+Store and share your custom configurations:
+
+```javascript
+// Define custom preset
+const myCustomPreset = {
+  name: 'Ocean Sunset',
+  params: {
+    colors: ['#ff6b35', '#f7931e', '#c9cba3', '#1d3557'],
+    distortion: 0.6,
+    swirl: 0.4,
+    grainMixer: 0.1,
+    grainOverlay: 0,
+    speed: 0.3,
+    fit: 'contain',
+    scale: 1,
+    rotation: 0,
+  },
+};
+
+// Save to localStorage
+localStorage.setItem('shaderPreset', JSON.stringify(myCustomPreset));
+
+// Load from localStorage
+const loadedPreset = JSON.parse(localStorage.getItem('shaderPreset'));
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Sizing & Fit" icon="arrows-maximize" href="/guides/sizing-and-fit">
+    Control how shaders scale and fit containers
+  </Card>
+  
+  <Card title="Performance" icon="gauge-high" href="/guides/performance">
+    Optimize customized shaders for production
+  </Card>
+  
+  <Card title="API Reference" icon="code" href="/api/shader-mount">
+    Explore all shader parameters
+  </Card>
+  
+  <Card title="React Usage" icon="react" href="/guides/react-usage">
+    React-specific customization patterns
+  </Card>
+</CardGroup>

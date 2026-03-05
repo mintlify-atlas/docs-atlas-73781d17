@@ -1,0 +1,671 @@
+---
+title: "Sizing and Fit"
+description: "Guide to shader sizing, fit modes, and responsive behavior"
+---
+
+## Overview
+
+Paper Shaders provide powerful sizing controls to manage how shader graphics scale and fit within their containers. This guide covers the sizing system, fit modes, and responsive strategies.
+
+## Container Sizing
+
+Shaders automatically fill their container element:
+
+<Tabs>
+  <Tab title="React">
+    ```jsx
+    // Use CSS to size the container
+    <MeshGradient
+      colors={['#ff0000', '#00ff00']}
+      style={{ width: 400, height: 400 }}
+    />
+    
+    // Or use className
+    <MeshGradient
+      colors={['#ff0000', '#00ff00']}
+      className="shader-container"
+    />
+    
+    // With inline width/height props
+    <MeshGradient
+      colors={['#ff0000', '#00ff00']}
+      width={400}
+      height={400}
+    />
+    ```
+  </Tab>
+  
+  <Tab title="Vanilla JS">
+    ```javascript
+    // Size via CSS
+    const container = document.getElementById('shader-container');
+    container.style.width = '400px';
+    container.style.height = '400px';
+    
+    const shaderMount = new ShaderMount(
+      container,
+      fragmentShader,
+      uniforms
+    );
+    ```
+  </Tab>
+</Tabs>
+
+<Note>
+Shader canvas automatically resizes when the container size changes using 
+ResizeObserver. No manual intervention needed.
+</Note>
+
+## Fit Modes
+
+The `fit` parameter controls how shader graphics scale within the container:
+
+### None
+
+No automatic fitting - renders at natural scale:
+
+```jsx
+<MeshGradient
+  fit="none"
+  scale={1}
+  colors={['#ff0000', '#00ff00']}
+  style={{ width: 400, height: 400 }}
+/>
+```
+
+**Use cases:**
+- Tiling patterns
+- Precise pixel control
+- Coordinated multi-shader layouts
+
+### Contain
+
+Fits entire graphic inside container while maintaining aspect ratio:
+
+```jsx
+<MeshGradient
+  fit="contain"
+  colors={['#ff0000', '#00ff00']}
+  style={{ width: 400, height: 300 }}
+/>
+```
+
+**Behavior:**
+- Entire graphic visible
+- May have empty space on sides
+- Maintains aspect ratio
+- Default for most object-based shaders
+
+**Use cases:**
+- Logos and graphics that must be fully visible
+- Aspect-ratio-sensitive designs
+- Card backgrounds
+
+### Cover
+
+Fills entire container while maintaining aspect ratio:
+
+```jsx
+<MeshGradient
+  fit="cover"
+  colors={['#ff0000', '#00ff00']}
+  style={{ width: 400, height: 300 }}
+/>
+```
+
+**Behavior:**
+- Fills entire container
+- May crop parts of graphic
+- Maintains aspect ratio
+- No empty space
+
+**Use cases:**
+- Hero backgrounds
+- Full-bleed sections
+- When cropping is acceptable
+
+### Visual Comparison
+
+<CodeGroup>
+```jsx None
+<div style={{ width: 400, height: 200, border: '2px solid' }}>
+  <MeshGradient
+    fit="none"
+    colors={['#ff0000', '#00ff00']}
+  />
+</div>
+// Renders at natural scale, may overflow or have gaps
+```
+
+```jsx Contain
+<div style={{ width: 400, height: 200, border: '2px solid' }}>
+  <MeshGradient
+    fit="contain"
+    colors={['#ff0000', '#00ff00']}
+  />
+</div>
+// Fits entirely, may have letterboxing
+```
+
+```jsx Cover
+<div style={{ width: 400, height: 200, border: '2px solid' }}>
+  <MeshGradient
+    fit="cover"
+    colors={['#ff0000', '#00ff00']}
+  />
+</div>
+// Fills completely, may crop edges
+```
+</CodeGroup>
+
+## Sizing Parameters
+
+Fine-tune shader positioning and scaling:
+
+### Scale
+
+Zoom the shader graphic:
+
+```jsx
+<MeshGradient
+  fit="contain"
+  scale={1.5}    // 150% zoom
+  colors={['#ff0000', '#00ff00']}
+/>
+
+// Scale range: 0.01 to 4
+// Default: 1
+```
+
+<Tip>
+`scale` applies after `fit` calculations, so `fit="contain"` + `scale={2}` 
+will contain the graphic then zoom it 2x (likely cropping).
+</Tip>
+
+### Rotation
+
+Rotate the shader graphic:
+
+```jsx
+<MeshGradient
+  rotation={45}   // 45 degrees clockwise
+  colors={['#ff0000', '#00ff00']}
+/>
+
+// Range: 0 to 360 degrees
+// Default: 0
+```
+
+### Origin
+
+Set rotation and scaling pivot point:
+
+```jsx
+<MeshGradient
+  originX={0.5}   // Center horizontally (0 = left, 1 = right)
+  originY={0.5}   // Center vertically (0 = top, 1 = bottom)
+  rotation={45}
+  colors={['#ff0000', '#00ff00']}
+/>
+
+// Default: originX={0.5}, originY={0.5} (center)
+```
+
+**Common origin points:**
+- Top-left: `originX={0}`, `originY={0}`
+- Top-center: `originX={0.5}`, `originY={0}`
+- Center: `originX={0.5}`, `originY={0.5}` (default)
+- Bottom-right: `originX={1}`, `originY={1}`
+
+### Offset
+
+Shift the graphic position:
+
+```jsx
+<MeshGradient
+  offsetX={0.2}   // Shift right by 20%
+  offsetY={-0.1}  // Shift up by 10%
+  colors={['#ff0000', '#00ff00']}
+/>
+
+// Range: -1 to 1 (relative to container)
+// Default: offsetX={0}, offsetY={0}
+```
+
+### World Dimensions
+
+Define virtual canvas size for precise control:
+
+```jsx
+<MeshGradient
+  worldWidth={1000}   // Virtual width in arbitrary units
+  worldHeight={1000}  // Virtual height in arbitrary units
+  fit="contain"
+  colors={['#ff0000', '#00ff00']}
+/>
+
+// Default: worldWidth={0}, worldHeight={0} (auto)
+// When 0, uses container dimensions
+```
+
+**Use cases:**
+- Matching shader scale across different containers
+- Consistent sizing in responsive layouts
+- Precise alignment with other elements
+
+## Complete Sizing Example
+
+Combine all sizing parameters:
+
+```jsx
+<MeshGradient
+  // Fit mode
+  fit="cover"
+  
+  // Scaling and rotation
+  scale={1.2}
+  rotation={15}
+  
+  // Position
+  originX={0.3}
+  originY={0.7}
+  offsetX={0.1}
+  offsetY={-0.05}
+  
+  // Virtual dimensions
+  worldWidth={1200}
+  worldHeight={800}
+  
+  // Visual parameters
+  colors={['#ff0000', '#00ff00', '#0000ff']}
+  distortion={0.8}
+  
+  style={{ width: 600, height: 400 }}
+/>
+```
+
+## Sizing in Vanilla JS
+
+Set sizing parameters as uniforms:
+
+```javascript
+import { ShaderFitOptions } from '@paper-design/shaders';
+
+const uniforms = {
+  // Shader-specific uniforms
+  u_colors: [/*...*/],
+  u_colorsCount: 3,
+  
+  // Sizing uniforms
+  u_fit: ShaderFitOptions.cover,  // 0=none, 1=contain, 2=cover
+  u_scale: 1.2,
+  u_rotation: 15,
+  u_originX: 0.3,
+  u_originY: 0.7,
+  u_offsetX: 0.1,
+  u_offsetY: -0.05,
+  u_worldWidth: 1200,
+  u_worldHeight: 800,
+};
+
+const shaderMount = new ShaderMount(
+  container,
+  fragmentShader,
+  uniforms
+);
+
+// Update sizing dynamically
+shaderMount.setUniforms({
+  u_scale: 1.5,
+  u_rotation: 30,
+});
+```
+
+## Responsive Strategies
+
+### Fluid Container
+
+Let shader scale naturally with container:
+
+```jsx
+<div style={{ width: '100%', maxWidth: 600 }}>
+  <MeshGradient
+    fit="cover"
+    colors={['#ff0000', '#00ff00']}
+    style={{ width: '100%', height: 400 }}
+  />
+</div>
+```
+
+### Aspect Ratio Container
+
+Maintain aspect ratio on resize:
+
+```jsx
+<div style={{ width: '100%', aspectRatio: '16 / 9' }}>
+  <MeshGradient
+    fit="cover"
+    colors={['#ff0000', '#00ff00']}
+    style={{ width: '100%', height: '100%' }}
+  />
+</div>
+```
+
+### Breakpoint-Based Sizing
+
+Adjust sizing parameters by screen size:
+
+```jsx
+import { useState, useEffect } from 'react';
+
+function ResponsiveSizing() {
+  const [scale, setScale] = useState(1);
+  
+  useEffect(() => {
+    const updateScale = () => {
+      if (window.innerWidth < 768) setScale(0.8);
+      else if (window.innerWidth < 1024) setScale(1);
+      else setScale(1.2);
+    };
+    
+    updateScale();
+    window.addEventListener('resize', updateScale);
+    return () => window.removeEventListener('resize', updateScale);
+  }, []);
+  
+  return (
+    <MeshGradient
+      fit="cover"
+      scale={scale}
+      colors={['#ff0000', '#00ff00']}
+      style={{ width: '100%', height: 400 }}
+    />
+  );
+}
+```
+
+### Container Queries
+
+Use container queries for component-level responsive sizing:
+
+```css
+.shader-wrapper {
+  container-type: inline-size;
+}
+
+@container (min-width: 600px) {
+  .shader-container {
+    height: 400px;
+  }
+}
+
+@container (max-width: 599px) {
+  .shader-container {
+    height: 300px;
+  }
+}
+```
+
+```jsx
+<div className="shader-wrapper">
+  <MeshGradient
+    fit="cover"
+    colors={['#ff0000', '#00ff00']}
+    className="shader-container"
+    style={{ width: '100%' }}
+  />
+</div>
+```
+
+## Pattern vs Object Sizing
+
+Different shader types have different default sizing:
+
+### Pattern Shaders
+
+Default: `fit="none"` for tiling:
+
+```jsx
+import { defaultPatternSizing } from '@paper-design/shaders';
+
+console.log(defaultPatternSizing);
+// {
+//   fit: 'none',
+//   scale: 1,
+//   rotation: 0,
+//   offsetX: 0,
+//   offsetY: 0,
+//   originX: 0.5,
+//   originY: 0.5,
+//   worldWidth: 0,
+//   worldHeight: 0,
+// }
+
+// Examples: DotGrid, Waves, Voronoi
+<DotGrid
+  fit="none"  // Default
+  scale={0.5} // Adjust pattern density
+  colors={['#ff0000']}
+/>
+```
+
+### Object Shaders
+
+Default: `fit="contain"` for full visibility:
+
+```jsx
+import { defaultObjectSizing } from '@paper-design/shaders';
+
+console.log(defaultObjectSizing);
+// {
+//   fit: 'contain',
+//   scale: 1,
+//   rotation: 0,
+//   offsetX: 0,
+//   offsetY: 0,
+//   originX: 0.5,
+//   originY: 0.5,
+//   worldWidth: 0,
+//   worldHeight: 0,
+// }
+
+// Examples: MeshGradient, Metaballs, SmokeRing
+<MeshGradient
+  fit="contain"  // Default
+  colors={['#ff0000', '#00ff00']}
+/>
+```
+
+## Advanced: Coordinated Sizing
+
+Sync sizing across multiple shaders:
+
+```jsx
+function CoordinatedShaders() {
+  const [rotation, setRotation] = useState(0);
+  
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setRotation(r => (r + 1) % 360);
+    }, 50);
+    return () => clearInterval(interval);
+  }, []);
+  
+  const sharedSizing = {
+    fit: 'cover',
+    scale: 1.5,
+    rotation,
+    worldWidth: 1000,
+    worldHeight: 1000,
+  };
+  
+  return (
+    <div style={{ position: 'relative', width: 600, height: 400 }}>
+      {/* Background layer */}
+      <MeshGradient
+        {...sharedSizing}
+        colors={['#ff0000', '#00ff00']}
+        style={{ position: 'absolute', inset: 0 }}
+      />
+      
+      {/* Foreground layer */}
+      <DotOrbit
+        {...sharedSizing}
+        colors={['#0000ff', '#ffff00']}
+        style={{
+          position: 'absolute',
+          inset: 0,
+          mixBlendMode: 'screen',
+        }}
+      />
+    </div>
+  );
+}
+```
+
+## Sizing Best Practices
+
+<AccordionGroup>
+  <Accordion title="Choose the Right Fit Mode">
+    - Use `cover` for backgrounds that should fill completely
+    - Use `contain` for graphics that must be fully visible
+    - Use `none` for tiling patterns and precise layouts
+  </Accordion>
+  
+  <Accordion title="Handle Responsive Sizing">
+    - Use percentage-based container widths
+    - Consider `aspect-ratio` CSS property
+    - Adjust `scale` parameter for mobile vs desktop
+    - Test on actual devices, not just browser resize
+  </Accordion>
+  
+  <Accordion title="Performance Considerations">
+    - Larger containers = more pixels = slower rendering
+    - Use `maxPixelCount` to limit rendering resolution
+    - Consider static shaders (`speed={0}`) for large areas
+    - See [Performance Guide](/guides/performance) for details
+  </Accordion>
+  
+  <Accordion title="Coordinate Multiple Shaders">
+    - Use matching `worldWidth` and `worldHeight`
+    - Share `rotation` and `scale` for synchronized effects
+    - Consider `offsetX`/`offsetY` for layered compositions
+  </Accordion>
+</AccordionGroup>
+
+## Common Sizing Patterns
+
+### Full-Screen Background
+
+```jsx
+<div style={{ width: '100vw', height: '100vh', overflow: 'hidden' }}>
+  <MeshGradient
+    fit="cover"
+    colors={['#ff0000', '#00ff00']}
+    style={{ width: '100%', height: '100%' }}
+  />
+</div>
+```
+
+### Hero Section
+
+```jsx
+<section style={{ position: 'relative', height: '70vh' }}>
+  <MeshGradient
+    fit="cover"
+    colors={['#ff0000', '#00ff00']}
+    style={{
+      position: 'absolute',
+      inset: 0,
+      zIndex: -1,
+    }}
+  />
+  <div style={{ position: 'relative', zIndex: 1 }}>
+    <h1>Hero Content</h1>
+  </div>
+</section>
+```
+
+### Card Background
+
+```jsx
+<div style={{ position: 'relative', borderRadius: 16, overflow: 'hidden' }}>
+  <MeshGradient
+    fit="cover"
+    colors={['#ff0000', '#00ff00']}
+    style={{
+      position: 'absolute',
+      inset: 0,
+      zIndex: -1,
+    }}
+  />
+  <div style={{ padding: 24, position: 'relative' }}>
+    <h2>Card Title</h2>
+    <p>Card content</p>
+  </div>
+</div>
+```
+
+### Tiling Pattern
+
+```jsx
+<div style={{ width: '100%', height: 400 }}>
+  <DotGrid
+    fit="none"
+    scale={0.5}      // Controls dot density
+    colors={['#ff0000']}
+    colorBack="#000000"
+    style={{ width: '100%', height: '100%' }}
+  />
+</div>
+```
+
+## Troubleshooting
+
+### Shader not visible
+
+<Steps>
+  <Step title="Check container has dimensions">
+    Ensure container has explicit width and height (CSS or inline)
+  </Step>
+  
+  <Step title="Verify fit mode">
+    Try `fit="cover"` to ensure shader fills container
+  </Step>
+  
+  <Step title="Check scale and offset">
+    Ensure `scale` isn't too large or `offset` isn't pushing content out
+  </Step>
+</Steps>
+
+### Shader looks cropped
+
+- Try `fit="contain"` instead of `cover`
+- Reduce `scale` parameter
+- Adjust `offset` to recenter
+
+### Shader doesn't resize
+
+- Verify container size actually changes (check DevTools)
+- ResizeObserver works automatically - no manual action needed
+- Check for fixed dimensions preventing resize
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Performance" icon="gauge-high" href="/guides/performance">
+    Optimize shader resolution and rendering
+  </Card>
+  
+  <Card title="Customization" icon="sliders" href="/guides/customization">
+    Customize shader visual parameters
+  </Card>
+  
+  <Card title="React Usage" icon="react" href="/guides/react-usage">
+    React-specific sizing patterns
+  </Card>
+  
+  <Card title="Vanilla Usage" icon="js" href="/guides/vanilla-usage">
+    Vanilla JS sizing control
+  </Card>
+</CardGroup>

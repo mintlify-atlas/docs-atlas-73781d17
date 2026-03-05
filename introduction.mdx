@@ -1,0 +1,123 @@
+---
+title: Introduction
+description: Beautiful, performant WebGL shaders for modern web applications
+---
+
+Paper Shaders is a collection of zero-dependency WebGL shaders designed to bring visual richness to your web projects. Built for both designers and developers, it provides a library of highly customizable, lightweight shaders that can be used as backgrounds, textures, or visual effects.
+
+## What is Paper Shaders?
+
+Paper Shaders offers a curated collection of GPU-accelerated visual effects that run directly in the browser using WebGL2. Each shader is carefully optimized for performance and visual quality, providing smooth animations and stunning graphics without compromising your application's speed.
+
+<CardGroup cols={2}>
+  <Card title="Zero Dependencies" icon="feather">
+    Pure WebGL implementation with no external dependencies, keeping your bundle size minimal
+  </Card>
+  <Card title="Framework Support" icon="react">
+    Available for vanilla JavaScript and React, with community support for other frameworks
+  </Card>
+  <Card title="Highly Customizable" icon="sliders">
+    Every shader comes with extensive parameters to fine-tune colors, animations, and visual properties
+  </Card>
+  <Card title="Maximum Performance" icon="gauge-high">
+    Optimized for speed with support for static rendering (zero animation cost) and adaptive pixel ratios
+  </Card>
+</CardGroup>
+
+## Key Features
+
+### Wide Variety of Shaders
+
+Paper Shaders includes over 25 different shader effects:
+
+- **Gradients**: Mesh Gradient, Static Mesh Gradient, Static Radial Gradient, Grain Gradient
+- **Noise & Organic**: Perlin Noise, Simplex Noise, Neuro Noise, Smoke Ring
+- **Patterns**: Dot Orbit, Dot Grid, Waves, Voronoi, Halftone Dots, Halftone CMYK
+- **Effects**: God Rays, Liquid Metal, Metaballs, Warp, Swirl, Spiral
+- **Filters**: Water, Fluted Glass, Image Dithering, Heatmap, Paper Texture
+- **And more**: Color Panels, Pulsing Border, Dithering
+
+### Visual Design Integration
+
+Designed to work seamlessly with [Paper](https://paper.design), allowing designers to create and export shader configurations visually without writing code.
+
+### Responsive & Adaptive
+
+- Automatic canvas sizing to match parent element dimensions
+- Adaptive pixel ratio for optimal quality on high-DPI displays
+- Configurable maximum pixel count to balance quality and performance
+
+### Animation Control
+
+- Adjustable animation speed (including reverse playback)
+- Deterministic frame-based rendering for consistent results
+- Zero-cost static rendering when `speed={0}`
+
+## Use Cases
+
+<AccordionGroup>
+  <Accordion title="Hero Sections & Backgrounds">
+    Create eye-catching animated backgrounds for landing pages and hero sections using shaders like Mesh Gradient, Simplex Noise, or God Rays.
+  </Accordion>
+  
+  <Accordion title="UI Textures & Effects">
+    Add subtle texture and depth to UI elements with Paper Texture, Grain Gradient, or Halftone effects.
+  </Accordion>
+  
+  <Accordion title="Interactive Visuals">
+    Build dynamic, responsive visuals that react to user interaction or data changes using any animated shader.
+  </Accordion>
+  
+  <Accordion title="Image Filters">
+    Apply real-time image processing effects like Water distortion, Fluted Glass, Image Dithering, or Heatmap overlays.
+  </Accordion>
+  
+  <Accordion title="Loading States">
+    Create engaging loading animations with Metaballs, Swirl, or Pulsing Border shaders.
+  </Accordion>
+</AccordionGroup>
+
+## Browser Support
+
+Paper Shaders requires WebGL2 support, which is available in:
+
+- Chrome 56+
+- Firefox 51+
+- Safari 15+
+- Edge 79+
+
+The library automatically detects WebGL2 availability and provides clear error messages if not supported.
+
+## Design Philosophy
+
+Paper Shaders is built around four core values:
+
+1. **Lightweight & Performant**: Maximum visual impact with minimal performance cost
+2. **Visual Quality**: Carefully crafted shaders with attention to aesthetic detail
+3. **Easy to Use**: Simple, intuitive APIs with sensible defaults
+4. **Wide Compatibility**: Broad browser and device support
+
+## License
+
+Paper Shaders uses the PolyForm Shield license. The code is free to use in any commercial or non-commercial apps, products, and libraries, as long as they do not compete with Paper or Paper Shaders.
+
+<Warning>
+  You may **not** use this code in a library or design tool that competes with Paper or Paper Shaders.
+</Warning>
+
+We appreciate links back to Paper Shaders when using this code—it helps us continue investing in the project.
+
+<Card title="Read the Full License" icon="file-contract" href="https://github.com/paper-design/shaders/blob/main/LICENSE">
+  View the complete license terms on GitHub
+</Card>
+
+## What's Next?
+
+<CardGroup cols={2}>
+  <Card title="Installation" icon="download" href="/installation">
+    Get started by installing Paper Shaders in your project
+  </Card>
+  <Card title="Quick Start" icon="rocket" href="/quickstart">
+    Create your first shader in under 5 minutes
+  </Card>
+</CardGroup>

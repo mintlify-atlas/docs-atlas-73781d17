@@ -1,0 +1,225 @@
+---
+title: TypeScript Types
+description: Core TypeScript types and interfaces used throughout Paper Shaders
+---
+
+## Overview
+
+Paper Shaders provides TypeScript type definitions for all its exports. This page documents the core types used for vector math and shader parameters.
+
+## Vector Types
+
+Paper Shaders uses fixed-length array types for vector math, which map directly to GLSL vector types.
+
+### vec2
+
+A 2-component vector.
+
+```typescript
+type vec2 = [number, number];
+```
+
+**Usage:**
+```typescript
+import type { vec2 } from 'paper-shaders';
+
+const position: vec2 = [100, 200];
+const scale: vec2 = [1.5, 1.5];
+const uv: vec2 = [0.5, 0.5];
+```
+
+**Maps to GLSL:**
+```glsl
+uniform vec2 u_position; // [x, y]
+```
+
+### vec3
+
+A 3-component vector.
+
+```typescript
+type vec3 = [number, number, number];
+```
+
+**Usage:**
+```typescript
+import type { vec3 } from 'paper-shaders';
+
+const color: vec3 = [1.0, 0.5, 0.2]; // RGB
+const position: vec3 = [10, 20, 30]; // XYZ
+```
+
+**Maps to GLSL:**
+```glsl
+uniform vec3 u_color; // [r, g, b]
+```
+
+### vec4
+
+A 4-component vector.
+
+```typescript
+type vec4 = [number, number, number, number];
+```
+
+**Usage:**
+```typescript
+import type { vec4 } from 'paper-shaders';
+
+const color: vec4 = [1.0, 0.5, 0.2, 1.0]; // RGBA
+const bounds: vec4 = [0, 0, 100, 100]; // x, y, width, height
+```
+
+**Maps to GLSL:**
+```glsl
+uniform vec4 u_color; // [r, g, b, a]
+```
+
+## Common Usage Patterns
+
+### Color Values
+
+Colors in shaders use 0-1 range (not 0-255):
+
+```typescript
+import type { vec3, vec4 } from 'paper-shaders';
+
+// RGB color (no alpha)
+const red: vec3 = [1.0, 0.0, 0.0];
+const green: vec3 = [0.0, 1.0, 0.0];
+const blue: vec3 = [0.0, 0.0, 1.0];
+
+// RGBA color (with alpha)
+const semiTransparentRed: vec4 = [1.0, 0.0, 0.0, 0.5];
+const opaqueBlue: vec4 = [0.0, 0.0, 1.0, 1.0];
+```
+
+### Position & Scale
+
+```typescript
+import type { vec2 } from 'paper-shaders';
+
+// 2D position
+const position: vec2 = [100, 200];
+
+// Uniform scale
+const scale: vec2 = [2.0, 2.0];
+
+// Non-uniform scale
+const stretch: vec2 = [2.0, 0.5];
+```
+
+### Converting from 0-255 to 0-1
+
+If you have color values in 0-255 range (like from CSS), convert them:
+
+```typescript
+import type { vec4 } from 'paper-shaders';
+
+function rgbToVec4(r: number, g: number, b: number, a: number = 255): vec4 {
+  return [r / 255, g / 255, b / 255, a / 255];
+}
+
+const color = rgbToVec4(255, 128, 64, 255);
+// Result: [1.0, 0.5019607843137255, 0.25098039215686274, 1.0]
+```
+
+### Using Color Utilities
+
+For easier color handling, use the `getShaderColorFromString` utility:
+
+```typescript
+import { getShaderColorFromString } from 'paper-shaders';
+import type { vec4 } from 'paper-shaders';
+
+// From hex
+const color1: vec4 = getShaderColorFromString('#ff8040');
+
+// From RGB
+const color2: vec4 = getShaderColorFromString('rgb(255, 128, 64)');
+
+// From RGBA
+const color3: vec4 = getShaderColorFromString('rgba(255, 128, 64, 0.5)');
+
+// From HSL
+const color4: vec4 = getShaderColorFromString('hsl(20, 100%, 62%)');
+
+// Already in array format (pass-through)
+const color5: vec4 = getShaderColorFromString([1.0, 0.5, 0.25, 1.0]);
+```
+
+## Type Safety
+
+These types provide compile-time safety for shader uniforms:
+
+```typescript
+import { ShaderMount, type ShaderMountUniforms, type vec4 } from 'paper-shaders';
+
+const uniforms: ShaderMountUniforms = {
+  u_color1: [1.0, 0.5, 0.2, 1.0] as vec4, // ✓ Correct
+  u_color2: [1.0, 0.5, 0.2],              // ✓ Also valid (vec3)
+  // u_color3: [1.0, 0.5],                // ✗ TypeScript error (vec2, not a color)
+};
+
+const shaderMount = new ShaderMount(
+  document.getElementById('container')!,
+  fragmentShader,
+  uniforms
+);
+```
+
+## Matrix Types
+
+While not explicitly typed, you can use arrays for matrices:
+
+```typescript
+import type { ShaderMountUniforms } from 'paper-shaders';
+
+// mat3 (9 elements)
+type mat3 = number[];
+const identityMat3: mat3 = [
+  1, 0, 0,
+  0, 1, 0,
+  0, 0, 1
+];
+
+// mat4 (16 elements)
+type mat4 = number[];
+const identityMat4: mat4 = [
+  1, 0, 0, 0,
+  0, 1, 0, 0,
+  0, 0, 1, 0,
+  0, 0, 0, 1
+];
+
+const uniforms: ShaderMountUniforms = {
+  u_transform: identityMat3,
+  u_projection: identityMat4,
+};
+```
+
+## Array Uniforms
+
+For arrays of vectors:
+
+```typescript
+import type { vec4, ShaderMountUniforms } from 'paper-shaders';
+
+const colors: vec4[] = [
+  [1.0, 0.0, 0.0, 1.0],
+  [0.0, 1.0, 0.0, 1.0],
+  [0.0, 0.0, 1.0, 1.0],
+];
+
+const uniforms: ShaderMountUniforms = {
+  u_colors: colors, // Will be flattened automatically
+};
+
+// In GLSL:
+// uniform vec4 u_colors[3];
+```
+
+## Related
+
+- [ShaderMount](/api/shader-mount) - For `ShaderMountUniforms` type
+- [Utilities](/api/utilities) - For color conversion utilities

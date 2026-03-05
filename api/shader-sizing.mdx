@@ -1,0 +1,243 @@
+---
+title: Shader Sizing
+description: Shader sizing options and utilities for controlling layout and transforms
+---
+
+## Overview
+
+Shader sizing utilities provide control over how shaders are positioned, scaled, and transformed within their containers. These are particularly useful for pattern shaders and image-based effects.
+
+## Types
+
+### ShaderSizingParams
+
+Parameters for controlling shader sizing, positioning, and transformation.
+
+```typescript
+interface ShaderSizingParams {
+  fit?: 'none' | 'contain' | 'cover';
+  scale?: number;
+  rotation?: number;
+  originX?: number;
+  originY?: number;
+  offsetX?: number;
+  offsetY?: number;
+  worldWidth?: number;
+  worldHeight?: number;
+}
+```
+
+<ParamField path="fit" type="'none' | 'contain' | 'cover'">
+  How the shader should fit within its container.
+  - `'none'` - No fitting applied (1:1 pixel mapping)
+  - `'contain'` - Scale to fit inside container while maintaining aspect ratio
+  - `'cover'` - Scale to cover entire container while maintaining aspect ratio
+</ParamField>
+
+<ParamField path="scale" type="number">
+  Scale multiplier for the shader content.
+</ParamField>
+
+<ParamField path="rotation" type="number">
+  Rotation angle in radians.
+</ParamField>
+
+<ParamField path="originX" type="number">
+  Horizontal origin point for transforms (0.0 = left, 0.5 = center, 1.0 = right).
+</ParamField>
+
+<ParamField path="originY" type="number">
+  Vertical origin point for transforms (0.0 = top, 0.5 = center, 1.0 = bottom).
+</ParamField>
+
+<ParamField path="offsetX" type="number">
+  Horizontal offset in pixels.
+</ParamField>
+
+<ParamField path="offsetY" type="number">
+  Vertical offset in pixels.
+</ParamField>
+
+<ParamField path="worldWidth" type="number">
+  Custom world width for coordinate space.
+</ParamField>
+
+<ParamField path="worldHeight" type="number">
+  Custom world height for coordinate space.
+</ParamField>
+
+### ShaderSizingUniforms
+
+The uniform values passed to the shader for sizing calculations.
+
+```typescript
+interface ShaderSizingUniforms {
+  u_fit: 0 | 1 | 2; // none, contain, cover
+  u_scale: number;
+  u_rotation: number;
+  u_originX: number;
+  u_originY: number;
+  u_offsetX: number;
+  u_offsetY: number;
+  u_worldWidth: number;
+  u_worldHeight: number;
+}
+```
+
+### ShaderFit
+
+Fit mode type.
+
+```typescript
+type ShaderFit = 'none' | 'contain' | 'cover';
+```
+
+## Constants
+
+### ShaderFitOptions
+
+Mapping of fit mode names to numeric values used in shaders.
+
+```typescript
+const ShaderFitOptions = {
+  none: 0,
+  contain: 1,
+  cover: 2,
+} as const;
+```
+
+### defaultObjectSizing
+
+Default sizing parameters for object-based shaders (images, logos, etc.).
+
+```typescript
+const defaultObjectSizing: Required<ShaderSizingParams> = {
+  fit: 'contain',
+  scale: 1,
+  rotation: 0,
+  offsetX: 0,
+  offsetY: 0,
+  originX: 0.5,
+  originY: 0.5,
+  worldWidth: 0,
+  worldHeight: 0,
+};
+```
+
+Use this preset for shaders that render specific objects or images that should be contained within the viewport.
+
+### defaultPatternSizing
+
+Default sizing parameters for pattern-based shaders (textures, backgrounds, etc.).
+
+```typescript
+const defaultPatternSizing: Required<ShaderSizingParams> = {
+  fit: 'none',
+  scale: 1,
+  rotation: 0,
+  offsetX: 0,
+  offsetY: 0,
+  originX: 0.5,
+  originY: 0.5,
+  worldWidth: 0,
+  worldHeight: 0,
+};
+```
+
+Use this preset for shaders that render repeating patterns or textures that should map 1:1 with pixels.
+
+## Usage Examples
+
+### Object Fitting
+
+```typescript
+import { defaultObjectSizing } from 'paper-shaders';
+
+const sizing: ShaderSizingParams = {
+  ...defaultObjectSizing,
+  fit: 'contain',
+  scale: 1.5,
+  rotation: Math.PI / 4, // 45 degrees
+};
+
+shaderMount.setUniforms(sizing);
+```
+
+### Pattern with Offset
+
+```typescript
+import { defaultPatternSizing } from 'paper-shaders';
+
+const sizing: ShaderSizingParams = {
+  ...defaultPatternSizing,
+  scale: 2,
+  offsetX: 100,
+  offsetY: 50,
+};
+
+shaderMount.setUniforms(sizing);
+```
+
+### Custom Transform Origin
+
+```typescript
+const sizing: ShaderSizingParams = {
+  fit: 'cover',
+  scale: 1.2,
+  rotation: 0.1,
+  originX: 0.25, // Left quarter
+  originY: 0.75, // Bottom quarter
+};
+
+shaderMount.setUniforms(sizing);
+```
+
+### Animated Rotation
+
+```typescript
+import { ShaderMount, defaultObjectSizing } from 'paper-shaders';
+
+let rotation = 0;
+function animate() {
+  rotation += 0.01;
+  shaderMount.setUniforms({
+    ...defaultObjectSizing,
+    rotation,
+  });
+  requestAnimationFrame(animate);
+}
+animate();
+```
+
+## Fit Modes Explained
+
+### none
+No fitting is applied. The shader renders at a 1:1 pixel ratio with the container. Best for patterns and textures that should tile or repeat.
+
+### contain
+The shader content is scaled to fit entirely within the container while maintaining its aspect ratio. Useful for images and logos that should be fully visible.
+
+### cover
+The shader content is scaled to completely cover the container while maintaining its aspect ratio. Parts may be cropped. Useful for background images and full-bleed effects.
+
+## Coordinate Spaces
+
+### World Coordinates
+When `worldWidth` and `worldHeight` are set to non-zero values, the shader uses these as the coordinate space instead of pixel dimensions. This is useful for:
+- Creating resolution-independent patterns
+- Maintaining consistent visual scale across different screen sizes
+- Building responsive designs with predictable behavior
+
+**Example:**
+```typescript
+const sizing: ShaderSizingParams = {
+  fit: 'none',
+  worldWidth: 1000,
+  worldHeight: 1000,
+  scale: 1,
+};
+
+// The shader will now use 0-1000 coordinate space
+// regardless of actual pixel dimensions
+shaderMount.setUniforms(sizing);
+```

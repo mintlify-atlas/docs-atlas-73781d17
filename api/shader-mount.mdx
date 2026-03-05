@@ -1,0 +1,333 @@
+---
+title: ShaderMount
+description: The core ShaderMount class for rendering GLSL shaders on the web
+---
+
+## Overview
+
+The `ShaderMount` class is the core of Paper Shaders. Pass it a parent element and a fragment shader to get started. It manages WebGL rendering, animation, uniforms, and performance optimization.
+
+## Constructor
+
+```typescript
+new ShaderMount(
+  parentElement: HTMLElement,
+  fragmentShader: string,
+  uniforms: ShaderMountUniforms,
+  webGlContextAttributes?: WebGLContextAttributes,
+  speed?: number,
+  frame?: number,
+  minPixelRatio?: number,
+  maxPixelCount?: number,
+  mipmaps?: string[]
+)
+```
+
+<ParamField path="parentElement" type="HTMLElement" required>
+  The div you'd like to mount the shader to. The shader will match its size.
+</ParamField>
+
+<ParamField path="fragmentShader" type="string" required>
+  The GLSL fragment shader source code to render.
+</ParamField>
+
+<ParamField path="uniforms" type="ShaderMountUniforms" required>
+  Initial uniform values for the shader. See [ShaderMountUniforms](#shadermountuniforms) below.
+</ParamField>
+
+<ParamField path="webGlContextAttributes" type="WebGLContextAttributes">
+  Optional WebGL context attributes for fine-tuning rendering behavior.
+</ParamField>
+
+<ParamField path="speed" type="number" default={0}>
+  The speed of the animation, or 0 to stop it. Supports negative values to play in reverse.
+</ParamField>
+
+<ParamField path="frame" type="number" default={0}>
+  Pass a frame to offset the starting `u_time` value and give deterministic results.
+</ParamField>
+
+<ParamField path="minPixelRatio" type="number" default={2}>
+  The minimum pixel ratio to render at. May be reduced to improve performance or increased together with `maxPixelCount` to improve antialiasing.
+</ParamField>
+
+<ParamField path="maxPixelCount" type="number" default={8294400}>
+  The maximum amount of physical device pixels to render for the shader. Default is 1920 × 1080 × 2x DPI = 8,294,400 pixels. Actual DOM size of the canvas can be larger, it will just lose quality after this. May be reduced to improve performance or increased to improve quality on high-resolution screens.
+</ParamField>
+
+<ParamField path="mipmaps" type="string[]" default={[]}>
+  Names of the uniforms that should have mipmaps generated for them (for texture uniforms).
+</ParamField>
+
+## Methods
+
+### setUniforms
+
+Update the uniforms that are provided by the shader. Can be a partial set with only the uniforms that have changed.
+
+```typescript
+setUniforms(newUniforms: ShaderMountUniforms): void
+```
+
+<ParamField path="newUniforms" type="ShaderMountUniforms" required>
+  Object containing the uniform values to update. Can be a partial update.
+</ParamField>
+
+**Example:**
+```typescript
+shaderMount.setUniforms({
+  u_color1: [1.0, 0.5, 0.2, 1.0],
+  u_intensity: 0.8
+});
+```
+
+### setSpeed
+
+Set an animation speed (or 0 to stop animation).
+
+```typescript
+setSpeed(newSpeed?: number): void
+```
+
+<ParamField path="newSpeed" type="number" default={1}>
+  The new animation speed. Use 0 to pause, negative values to play in reverse.
+</ParamField>
+
+**Example:**
+```typescript
+// Play at 2x speed
+shaderMount.setSpeed(2);
+
+// Pause
+shaderMount.setSpeed(0);
+
+// Play in reverse
+shaderMount.setSpeed(-1);
+```
+
+### setFrame
+
+Set a frame to get a deterministic result. Frames are literally just milliseconds from zero since the animation started.
+
+```typescript
+setFrame(newFrame: number): void
+```
+
+<ParamField path="newFrame" type="number" required>
+  The frame number (in milliseconds) to jump to.
+</ParamField>
+
+**Example:**
+```typescript
+// Jump to 5 seconds
+shaderMount.setFrame(5000);
+```
+
+### getCurrentFrame
+
+Gets the current total animation time from 0ms.
+
+```typescript
+getCurrentFrame(): number
+```
+
+<ResponseField name="frame" type="number">
+  The current frame number in milliseconds.
+</ResponseField>
+
+**Example:**
+```typescript
+const currentFrame = shaderMount.getCurrentFrame();
+console.log(`Current time: ${currentFrame}ms`);
+```
+
+### setMaxPixelCount
+
+Set the maximum pixel count for the shader, this will limit the number of pixels that will be rendered.
+
+```typescript
+setMaxPixelCount(newMaxPixelCount?: number): void
+```
+
+<ParamField path="newMaxPixelCount" type="number" default={8294400}>
+  The new maximum pixel count.
+</ParamField>
+
+### setMinPixelRatio
+
+Set the minimum pixel ratio for the shader.
+
+```typescript
+setMinPixelRatio(newMinPixelRatio?: number): void
+```
+
+<ParamField path="newMinPixelRatio" type="number" default={2}>
+  The new minimum pixel ratio.
+</ParamField>
+
+### dispose
+
+Dispose of the shader mount, cleaning up all of the WebGL resources.
+
+```typescript
+dispose(): void
+```
+
+**Example:**
+```typescript
+// Clean up when done
+shaderMount.dispose();
+```
+
+## Types
+
+### ShaderMountUniforms
+
+Uniform types that are supported to be auto-mapped into the fragment shader.
+
+```typescript
+interface ShaderMountUniforms {
+  [key: string]: boolean | number | number[] | number[][] | HTMLImageElement | undefined;
+}
+```
+
+Supported uniform types:
+- `boolean` - Mapped to GLSL `bool` or `int`
+- `number` - Mapped to GLSL `float` or `int`
+- `number[]` - Mapped to `vec2`, `vec3`, `vec4`, `mat3`, or `mat4` depending on length (2, 3, 4, 9, or 16)
+- `number[][]` - Flattened array for array uniforms
+- `HTMLImageElement` - Mapped to `sampler2D` textures
+- `undefined` - Skipped (convenience for server rendering)
+
+**Example:**
+```typescript
+const uniforms: ShaderMountUniforms = {
+  u_color: [1.0, 0.5, 0.2, 1.0], // vec4
+  u_intensity: 0.8, // float
+  u_enabled: true, // bool
+  u_image: imageElement, // sampler2D
+  u_matrix: [1, 0, 0, 0, 1, 0, 0, 0, 1] // mat3
+};
+```
+
+### PaperShaderElement
+
+The parent `<div>` element that has a ShaderMount available on it.
+
+```typescript
+interface PaperShaderElement extends HTMLElement {
+  paperShaderMount: ShaderMount | undefined;
+}
+```
+
+### ShaderMotionParams
+
+Parameters for controlling shader animation.
+
+```typescript
+interface ShaderMotionParams {
+  speed?: number;
+  frame?: number;
+}
+```
+
+### ShaderPreset
+
+A preset configuration for a shader.
+
+```typescript
+type ShaderPreset<T> = {
+  name: string;
+  params: Required<T>;
+};
+```
+
+### ImageShaderPreset
+
+A preset configuration for an image shader (excludes the image from preset params).
+
+```typescript
+type ImageShaderPreset<T> = {
+  name: string;
+  params: Required<Omit<T, 'image'>>;
+};
+```
+
+## Helper Functions
+
+### isPaperShaderElement
+
+Check if an element is a Paper shader element.
+
+```typescript
+function isPaperShaderElement(element: HTMLElement): element is PaperShaderElement
+```
+
+<ParamField path="element" type="HTMLElement" required>
+  The element to check.
+</ParamField>
+
+<ResponseField name="result" type="boolean">
+  `true` if the element has a `paperShaderMount` property.
+</ResponseField>
+
+**Example:**
+```typescript
+const div = document.querySelector('#my-shader');
+if (isPaperShaderElement(div)) {
+  // Safe to access div.paperShaderMount
+  div.paperShaderMount?.setSpeed(2);
+}
+```
+
+## Built-in Uniforms
+
+ShaderMount automatically provides these uniforms to your fragment shader:
+
+- `u_time` (float) - Total animation time in seconds
+- `u_resolution` (vec2) - Canvas resolution in pixels
+- `u_pixelRatio` (float) - Current render scale/pixel ratio
+
+## Complete Example
+
+```typescript
+import { ShaderMount } from 'paper-shaders';
+
+const fragmentShader = `
+  precision mediump float;
+  uniform float u_time;
+  uniform vec2 u_resolution;
+  uniform vec4 u_color;
+  uniform float u_speed;
+  
+  void main() {
+    vec2 uv = gl_FragCoord.xy / u_resolution;
+    float wave = sin(uv.x * 10.0 + u_time * u_speed);
+    gl_FragColor = u_color * wave;
+  }
+`;
+
+const parentDiv = document.querySelector('#shader-container');
+
+const shaderMount = new ShaderMount(
+  parentDiv,
+  fragmentShader,
+  {
+    u_color: [1.0, 0.5, 0.2, 1.0],
+    u_speed: 2.0
+  },
+  undefined, // webGlContextAttributes
+  1, // speed
+  0, // frame
+  2, // minPixelRatio
+  8294400 // maxPixelCount
+);
+
+// Later: update uniforms
+shaderMount.setUniforms({
+  u_color: [0.2, 0.8, 1.0, 1.0]
+});
+
+// Clean up when done
+shaderMount.dispose();
+```
